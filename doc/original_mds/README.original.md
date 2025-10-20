@@ -1,4 +1,19 @@
-# Giorgio's Fork of syncthing-android
+# Discontinued
+
+This app is discontinued. The last release on Github and F-Droid will happen
+with the December 2024 Syncthing version. Interactions (issues, PRs) are limited
+now, and the entire repo will be archived after the last release. Thus all
+contributions are preserved for any future (re)use. The forum is still open for
+discussions and questions. I would kindly ask you to refrain from trying to
+challenge the decision or asking "why-type" questions - I wont engage with them.
+
+The reason is a combination of Google making Play publishing something between
+hard and impossible and no active maintenance. The app saw no significant
+development for a long time and without Play releases I do no longer see enough
+benefit and/or have enough motivation to keep up the ongoing maintenance an app
+requires even without doing much, if any, changes.
+
+Thanks a lot to everyone who ever contributed to this app!
 
 # syncthing-android
 
@@ -6,7 +21,7 @@
 
 A wrapper of [Syncthing](https://github.com/syncthing/syncthing) for Android.
 
-<img src="app/src/main/play/listings/en-GB/graphics/phone-screenshots/screenshot_phone_1.png" alt="screenshot 1" width="200" /> <img src="app/src/main/play/listings/en-GB/graphics/phone-screenshots/screenshot_phone_2.png" alt="screenshot 2" width="200" /> <img src="app/src/main/play/listings/en-GB/graphics/phone-screenshots/screenshot_phone_3.png" alt="screenshot 3" width="200" />
+<img src="../../app/src/main/play/listings/en-GB/graphics/phone-screenshots/screenshot_phone_1.png" alt="screenshot 1" width="200" /> <img src="../../app/src/main/play/listings/en-GB/graphics/phone-screenshots/screenshot_phone_2.png" alt="screenshot 2" width="200" /> <img src="../../app/src/main/play/listings/en-GB/graphics/phone-screenshots/screenshot_phone_3.png" alt="screenshot 3" width="200" />
 
 # Translations
 
@@ -52,7 +67,7 @@ follow them separately.
        ```
        The required tools and NDK will be downloaded automatically.
 
-       **NOTE:** You should check [Dockerfile](docker/Dockerfile) for the
+       **NOTE:** You should check [Dockerfile](../../docker/Dockerfile) for the
        specific version numbers to insert in the command above.
 2. Go (see https://docs.syncthing.net/dev/building#prerequisites for the
    required version)
@@ -86,4 +101,4 @@ backslashes `\`.
 
 # License
 
-The project is licensed under the [MPLv2](LICENSE.md).
+The project is licensed under the [MPLv2](../../LICENSE.md).

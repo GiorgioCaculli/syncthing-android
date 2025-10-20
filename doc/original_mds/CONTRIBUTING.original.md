@@ -1,32 +1,31 @@
 ## Reporting Bugs
 
 Please file bugs in the [GitHub Issue
-Tracker](https://github.com/GiorgioCaculli/syncthing-android/issues). Bugs that
+Tracker](https://github.com/syncthing/syncthing-android/issues). Bugs that
 are not specific to Syncthing-Android should be reported to the
 [main project](https://github.com/syncthing/syncthing/issues) instead.
 Include at least the following in your issue report:
 
-- What happened
+ - What happened
 
-- What did you expect to happen instead of what *did* happen, if it's
-  not crazy obvious
+ - What did you expect to happen instead of what *did* happen, if it's
+   not crazy obvious
 
-- What version of Android, Syncthing and Syncthing-Android you are
-  running
+ - What version of Android, Syncthing and Syncthing-Android you are
+   running
 
-- Screenshot if the issue concerns something visible in the GUI
+ - Screenshot if the issue concerns something visible in the GUI
 
-- Console log entries, where possible and relevant
+ - Console log entries, where possible and relevant
 
 You can get logs in various ways:
 
-- Log window in the app: Settings -> Open Log -> Android Log
+ - Log window in the app: Settings -> Open Log -> Android Log
 
--
-Install [adb](http://www.howtogeek.com/125769/how-to-install-and-use-abd-the-android-debug-bridge-utility/),
-and run `adb logcat`. To see only info about crashes, run `adb logcat -s *:E`.
+ - Install [adb](http://www.howtogeek.com/125769/how-to-install-and-use-abd-the-android-debug-bridge-utility/), 
+   and run `adb logcat`. To see only info about crashes, run `adb logcat -s *:E`.
 
-- Using one of the various "logcat apps" on Google Play and F-Droid
+ - Using one of the various "logcat apps" on Google Play and F-Droid
 
 ## Contributing Translations
 
