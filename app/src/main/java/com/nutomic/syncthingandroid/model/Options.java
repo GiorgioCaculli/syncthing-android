@@ -1,6 +1,9 @@
 package com.nutomic.syncthingandroid.model;
 
-public class Options {
+public class Options
+{
+    public static final int USAGE_REPORTING_UNDECIDED = 0;
+    public static final int USAGE_REPORTING_DENIED = -1;
     public String[] listenAddresses;
     public String[] globalAnnounceServers;
     public boolean globalAnnounceEnabled;
@@ -34,14 +37,13 @@ public class Options {
     public boolean overwriteRemoteDeviceNamesOnConnect;
     public int tempIndexMinBlocks;
 
-    public static final int USAGE_REPORTING_UNDECIDED = 0;
-    public static final int USAGE_REPORTING_DENIED    = -1;
-
-    public boolean isUsageReportingAccepted(int urVersionMax) {
+    public boolean isUsageReportingAccepted( int urVersionMax )
+    {
         return urAccepted == urVersionMax;
     }
 
-    public boolean isUsageReportingDecided(int urVersionMax) {
-        return isUsageReportingAccepted(urVersionMax) || urAccepted == USAGE_REPORTING_DENIED;
+    public boolean isUsageReportingDecided( int urVersionMax )
+    {
+        return isUsageReportingAccepted( urVersionMax ) || urAccepted == USAGE_REPORTING_DENIED;
     }
 }

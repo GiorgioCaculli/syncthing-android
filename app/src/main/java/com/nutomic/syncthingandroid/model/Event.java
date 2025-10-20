@@ -1,8 +1,7 @@
 package com.nutomic.syncthingandroid.model;
 
-import java.util.Map;
-
-public class Event {
+public class Event
+{
 
     public int id;
     public int globalID;

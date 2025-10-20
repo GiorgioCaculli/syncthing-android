@@ -4,9 +4,10 @@ package com.nutomic.syncthingandroid.http;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import androidx.annotation.Nullable;
 import android.util.Log;
 import android.widget.ImageView;
+
+import androidx.annotation.Nullable;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
@@ -34,7 +35,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
-public abstract class ApiRequest {
+public abstract class ApiRequest
+{
 
     private static final String TAG = "ApiRequest";
 
@@ -42,47 +44,38 @@ public abstract class ApiRequest {
      * The name of the HTTP header used for the syncthing API key.
      */
     private static final String HEADER_API_KEY = "X-API-Key";
-
-    public interface OnSuccessListener {
-        void onSuccess(String result);
-    }
-
-    public interface OnImageSuccessListener {
-        void onImageSuccess(Bitmap result);
-    }
-
-    public interface OnErrorListener {
-        void onError(VolleyError error);
-    }
-
     private static RequestQueue sVolleyQueue;
-
-    private RequestQueue getVolleyQueue() {
-        if (sVolleyQueue == null) {
-            Context context = mContext.getApplicationContext();
-            sVolleyQueue = Volley.newRequestQueue(context, new NetworkStack());
-        }
-        return sVolleyQueue;
-    }
-
     private final Context mContext;
     private final URL mUrl;
     private final String mPath;
     private final String mApiKey;
 
-    ApiRequest(Context context, URL url, String path, String apiKey) {
+    ApiRequest( Context context, URL url, String path, String apiKey )
+    {
         mContext = context;
-        mUrl           = url;
-        mPath          = path;
-        mApiKey        = apiKey;
+        mUrl = url;
+        mPath = path;
+        mApiKey = apiKey;
     }
 
-    Uri buildUri(Map<String, String> params) {
-        Uri.Builder uriBuilder = Uri.parse(mUrl.toString())
+    private RequestQueue getVolleyQueue()
+    {
+        if ( sVolleyQueue == null )
+        {
+            Context context = mContext.getApplicationContext();
+            sVolleyQueue = Volley.newRequestQueue( context, new NetworkStack() );
+        }
+        return sVolleyQueue;
+    }
+
+    Uri buildUri( Map< String, String > params )
+    {
+        Uri.Builder uriBuilder = Uri.parse( mUrl.toString() )
                 .buildUpon()
-                .path(mPath);
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
+                .path( mPath );
+        for ( Map.Entry< String, String > entry : params.entrySet() )
+        {
+            uriBuilder.appendQueryParameter( entry.getKey(), entry.getValue() );
         }
         return uriBuilder.build();
     }
@@ -90,92 +83,134 @@ public abstract class ApiRequest {
     /**
      * Opens the connection, then returns success status and response string.
      */
-    void connect(int requestMethod, Uri uri, @Nullable String requestBody,
-                 @Nullable OnSuccessListener listener, @Nullable OnErrorListener errorListener) {
-        Log.v(TAG, "Performing request to " + uri.toString());
-        StringRequest request = new StringRequest(requestMethod, uri.toString(), reply -> {
-            if (listener != null) {
-                listener.onSuccess(reply);
+    void connect( int requestMethod, Uri uri, @Nullable String requestBody,
+                  @Nullable OnSuccessListener listener, @Nullable OnErrorListener errorListener )
+    {
+        Log.v( TAG, "Performing request to " + uri.toString() );
+        StringRequest request = new StringRequest( requestMethod, uri.toString(), reply ->
+        {
+            if ( listener != null )
+            {
+                listener.onSuccess( reply );
             }
-        }, error -> {
-            if (errorListener != null) {
-                errorListener.onError(error);
-            } else {
-                Log.w(TAG, "Request to " + uri + " failed, " + error.getMessage());
+        }, error ->
+        {
+            if ( errorListener != null )
+            {
+                errorListener.onError( error );
             }
-        }) {
+            else
+            {
+                Log.w( TAG, "Request to " + uri + " failed, " + error.getMessage() );
+            }
+        } )
+        {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                return ImmutableMap.of(HEADER_API_KEY, mApiKey);
+            public Map< String, String > getHeaders() throws AuthFailureError
+            {
+                return ImmutableMap.of( HEADER_API_KEY, mApiKey );
             }
 
             @Override
-            public byte[] getBody() throws AuthFailureError {
-                return Optional.fromNullable(requestBody).transform(String::getBytes).orNull();
+            public byte[] getBody() throws AuthFailureError
+            {
+                return Optional.fromNullable( requestBody ).transform( String::getBytes ).orNull();
             }
         };
 
         // Some requests seem to be slow or fail, make sure this doesn't break the app
         // (eg if an event request fails, new event requests won't be triggered).
-        request.setRetryPolicy(new DefaultRetryPolicy(5000, 5,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        getVolleyQueue().add(request);
+        request.setRetryPolicy( new DefaultRetryPolicy( 5000, 5,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT ) );
+        getVolleyQueue().add( request );
     }
 
     /**
      * Opens the connection, then returns success status and response bitmap.
      */
-    void makeImageRequest(Uri uri, @Nullable OnImageSuccessListener imageListener,
-                          @Nullable OnErrorListener errorListener) {
-        ImageRequest imageRequest =  new ImageRequest(uri.toString(), bitmap -> {
-            if (imageListener != null) {
-                imageListener.onImageSuccess(bitmap);
+    void makeImageRequest( Uri uri, @Nullable OnImageSuccessListener imageListener,
+                           @Nullable OnErrorListener errorListener )
+    {
+        ImageRequest imageRequest = new ImageRequest( uri.toString(), bitmap ->
+        {
+            if ( imageListener != null )
+            {
+                imageListener.onImageSuccess( bitmap );
             }
-        }, 0, 0, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, volleyError -> {
-            if(errorListener != null) {
-                errorListener.onError(volleyError);
+        }, 0, 0, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, volleyError ->
+        {
+            if ( errorListener != null )
+            {
+                errorListener.onError( volleyError );
             }
-            Log.d(TAG, "onErrorResponse: " + volleyError);
-        }) {
+            Log.d( TAG, "onErrorResponse: " + volleyError );
+        } )
+        {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                return ImmutableMap.of(HEADER_API_KEY, mApiKey);
+            public Map< String, String > getHeaders() throws AuthFailureError
+            {
+                return ImmutableMap.of( HEADER_API_KEY, mApiKey );
             }
         };
 
-        getVolleyQueue().add(imageRequest);
+        getVolleyQueue().add( imageRequest );
+    }
+
+    private SSLSocketFactory getSslSocketFactory()
+    {
+        try
+        {
+            SSLContext sslContext = SSLContext.getInstance( "TLS" );
+            File httpsCertPath = Constants.getHttpsCertFile( mContext );
+            sslContext.init( null, new TrustManager[]{ new SyncthingTrustManager( httpsCertPath ) },
+                    new SecureRandom() );
+            return sslContext.getSocketFactory();
+        }
+        catch ( NoSuchAlgorithmException |
+                KeyManagementException e )
+        {
+            Log.w( TAG, e );
+            return null;
+        }
+    }
+
+    public interface OnSuccessListener
+    {
+        void onSuccess( String result );
+    }
+
+    public interface OnImageSuccessListener
+    {
+        void onImageSuccess( Bitmap result );
+    }
+
+    public interface OnErrorListener
+    {
+        void onError( VolleyError error );
     }
 
     /**
      * Extends {@link HurlStack}, uses {@link #getSslSocketFactory()} and disables hostname
      * verification.
      */
-    private class NetworkStack extends HurlStack {
+    private class NetworkStack extends HurlStack
+    {
 
-        public NetworkStack() {
-            super(null, getSslSocketFactory());
+        public NetworkStack()
+        {
+            super( null, getSslSocketFactory() );
         }
+
         @Override
-        protected HttpURLConnection createConnection(URL url) throws IOException {
-            if (mUrl.toString().startsWith("https://")) {
-                HttpsURLConnection connection = (HttpsURLConnection) super.createConnection(url);
-                connection.setHostnameVerifier((hostname, session) -> true);
+        protected HttpURLConnection createConnection( URL url ) throws IOException
+        {
+            if ( mUrl.toString().startsWith( "https://" ) )
+            {
+                HttpsURLConnection connection = ( HttpsURLConnection ) super.createConnection( url );
+                connection.setHostnameVerifier( ( hostname, session ) -> true );
                 return connection;
             }
-            return super.createConnection(url);
-        }
-    }
-
-    private SSLSocketFactory getSslSocketFactory() {
-        try {
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            File httpsCertPath = Constants.getHttpsCertFile(mContext);
-            sslContext.init(null, new TrustManager[]{new SyncthingTrustManager(httpsCertPath)},
-                    new SecureRandom());
-            return sslContext.getSocketFactory();
-        } catch (NoSuchAlgorithmException | KeyManagementException e) {
-            Log.w(TAG, e);
-            return null;
+            return super.createConnection( url );
         }
     }
 }

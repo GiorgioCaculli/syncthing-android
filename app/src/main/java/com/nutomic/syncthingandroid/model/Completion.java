@@ -13,20 +13,24 @@ import java.util.Map;
  * according to syncthing's REST "/completion" JSON result schema.
  * Completion model of syncthing's web UI is completion[deviceId][folderId]
  */
-public class Completion {
+public class Completion
+{
 
     private static final String TAG = "Completion";
 
-    HashMap<String, HashMap<String, CompletionInfo>> deviceFolderMap =
-        new HashMap<String, HashMap<String, CompletionInfo>>();
+    HashMap< String, HashMap< String, CompletionInfo > > deviceFolderMap =
+            new HashMap< String, HashMap< String, CompletionInfo > >();
 
     /**
      * Removes a folder from the cache model.
      */
-    private void removeFolder(String folderId) {
-        for (HashMap<String, CompletionInfo> folderMap : deviceFolderMap.values()) {
-            if (folderMap.containsKey(folderId)) {
-                folderMap.remove(folderId);
+    private void removeFolder( String folderId )
+    {
+        for ( HashMap< String, CompletionInfo > folderMap : deviceFolderMap.values() )
+        {
+            if ( folderMap.containsKey( folderId ) )
+            {
+                folderMap.remove( folderId );
                 break;
             }
         }
@@ -36,69 +40,87 @@ public class Completion {
      * Updates device and folder information in the cache model
      * after a config update.
      */
-    public void updateFromConfig(List<Device> newDevices, List<Folder> newFolders) {
-        HashMap<String, CompletionInfo> folderMap;
+    public void updateFromConfig( List< Device > newDevices, List< Folder > newFolders )
+    {
+        HashMap< String, CompletionInfo > folderMap;
 
         // Handle devices that were removed from the config.
-        List<String> removedDevices = new ArrayList<>();;
+        List< String > removedDevices = new ArrayList<>();
         Boolean deviceFound;
-        for (String deviceId : deviceFolderMap.keySet()) {
+        for ( String deviceId : deviceFolderMap.keySet() )
+        {
             deviceFound = false;
-            for (Device device : newDevices) {
-                if (device.deviceID.equals(deviceId)) {
+            for ( Device device : newDevices )
+            {
+                if ( device.deviceID.equals( deviceId ) )
+                {
                     deviceFound = true;
                     break;
                 }
             }
-            if (!deviceFound) {
-                removedDevices.add(deviceId);
+            if ( !deviceFound )
+            {
+                removedDevices.add( deviceId );
             }
         }
-        for (String deviceId : removedDevices) {
-            Log.v(TAG, "updateFromConfig: Remove device '" + deviceId + "' from cache model");
-            deviceFolderMap.remove(deviceId);
+        for ( String deviceId : removedDevices )
+        {
+            Log.v( TAG, "updateFromConfig: Remove device '" + deviceId + "' from cache model" );
+            deviceFolderMap.remove( deviceId );
         }
 
         // Handle devices that were added to the config.
-        for (Device device : newDevices) {
-            if (!deviceFolderMap.containsKey(device.deviceID)) {
-                Log.v(TAG, "updateFromConfig: Add device '" + device.deviceID + "' to cache model");
-                deviceFolderMap.put(device.deviceID, new HashMap<String, CompletionInfo>());
+        for ( Device device : newDevices )
+        {
+            if ( !deviceFolderMap.containsKey( device.deviceID ) )
+            {
+                Log.v( TAG, "updateFromConfig: Add device '" + device.deviceID + "' to cache model" );
+                deviceFolderMap.put( device.deviceID, new HashMap< String, CompletionInfo >() );
             }
         }
 
         // Handle folders that were removed from the config.
-        List<String> removedFolders = new ArrayList<>();;
+        List< String > removedFolders = new ArrayList<>();
         Boolean folderFound;
-        for (Map.Entry<String, HashMap<String, CompletionInfo>> device : deviceFolderMap.entrySet()) {
-            for (String folderId : device.getValue().keySet()) {
+        for ( Map.Entry< String, HashMap< String, CompletionInfo > > device : deviceFolderMap.entrySet() )
+        {
+            for ( String folderId : device.getValue().keySet() )
+            {
                 folderFound = false;
-                for (Folder folder : newFolders) {
-                    if (folder.id.equals(folderId)) {
+                for ( Folder folder : newFolders )
+                {
+                    if ( folder.id.equals( folderId ) )
+                    {
                         folderFound = true;
                         break;
                     }
                 }
-                if (!folderFound) {
-                    removedFolders.add(folderId);
+                if ( !folderFound )
+                {
+                    removedFolders.add( folderId );
                 }
             }
         }
-        for (String folderId : removedFolders) {
-            Log.v(TAG, "updateFromConfig: Remove folder '" + folderId + "' from cache model");
-            removeFolder(folderId);
+        for ( String folderId : removedFolders )
+        {
+            Log.v( TAG, "updateFromConfig: Remove folder '" + folderId + "' from cache model" );
+            removeFolder( folderId );
         }
 
         // Handle folders that were added to the config.
-        for (Folder folder : newFolders) {
-            for (Device device : newDevices) {
-                if (folder.getDevice(device.deviceID) != null) {
+        for ( Folder folder : newFolders )
+        {
+            for ( Device device : newDevices )
+            {
+                if ( folder.getDevice( device.deviceID ) != null )
+                {
                     // folder is shared with device.
-                    folderMap = deviceFolderMap.get(device.deviceID);
-                    if (!folderMap.containsKey(folder.id)) {
-                        Log.v(TAG, "updateFromConfig: Add folder '" + folder.id +
-                                    "' shared with device '" + device.deviceID + "' to cache model.");
-                        folderMap.put(folder.id, new CompletionInfo());
+                    folderMap = deviceFolderMap.get( device.deviceID );
+                    if ( !folderMap.containsKey( folder.id ) )
+                    {
+                        Log.v( TAG, "updateFromConfig: Add folder '" + folder.id +
+                                "' shared with device '" + device.deviceID + "' to cache model." );
+                        folderMap.put( folder.id, new CompletionInfo() );
                     }
                 }
             }
@@ -109,33 +131,41 @@ public class Completion {
      * Calculates remote device sync completion percentage across all folders
      * shared with the device.
      */
-    public int getDeviceCompletion(String deviceId) {
+    public int getDeviceCompletion( String deviceId )
+    {
         int folderCount = 0;
         double sumCompletion = 0;
-        HashMap<String, CompletionInfo> folderMap = deviceFolderMap.get(deviceId);
-        if (folderMap != null) {
-            for (Map.Entry<String, CompletionInfo> folder : folderMap.entrySet()) {
+        HashMap< String, CompletionInfo > folderMap = deviceFolderMap.get( deviceId );
+        if ( folderMap != null )
+        {
+            for ( Map.Entry< String, CompletionInfo > folder : folderMap.entrySet() )
+            {
                 sumCompletion += folder.getValue().completion;
                 folderCount++;
             }
         }
-        if (folderCount == 0) {
+        if ( folderCount == 0 )
+        {
             return 100;
-        } else {
-            return (int) Math.floor(sumCompletion / folderCount);
+        }
+        else
+        {
+            return ( int ) Math.floor( sumCompletion / folderCount );
         }
     }
 
     /**
      * Set completionInfo within the completion[deviceId][folderId] model.
      */
-    public void setCompletionInfo(String deviceId, String folderId,
-                                    CompletionInfo completionInfo) {
+    public void setCompletionInfo( String deviceId, String folderId,
+                                   CompletionInfo completionInfo )
+    {
         // Add device parent node if it does not exist.
-        if (!deviceFolderMap.containsKey(deviceId)) {
-            deviceFolderMap.put(deviceId, new HashMap<String, CompletionInfo>());
+        if ( !deviceFolderMap.containsKey( deviceId ) )
+        {
+            deviceFolderMap.put( deviceId, new HashMap< String, CompletionInfo >() );
         }
         // Add folder or update existing folder entry.
-        deviceFolderMap.get(deviceId).put(folderId, completionInfo);
+        deviceFolderMap.get( deviceId ).put( folderId, completionInfo );
     }
 }

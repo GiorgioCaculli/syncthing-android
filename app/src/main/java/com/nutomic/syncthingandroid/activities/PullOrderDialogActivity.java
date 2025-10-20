@@ -5,72 +5,83 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+
 import com.nutomic.syncthingandroid.databinding.ActivityPullorderDialogBinding;
+
 import java.util.Arrays;
 import java.util.List;
 
-public class PullOrderDialogActivity extends ThemedAppCompatActivity {
+public class PullOrderDialogActivity extends ThemedAppCompatActivity
+{
 
     public static final String EXTRA_PULL_ORDER = "com.nutomic.syncthinandroid.activities.PullOrderDialogActivity.PULL_ORDER";
     public static final String EXTRA_RESULT_PULL_ORDER = "com.nutomic.syncthinandroid.activities.PullOrderDialogActivity.EXTRA_RESULT_PULL_ORDER";
-
+    private static final List< String > mTypes = Arrays.asList(
+            "random",
+            "alphabetic",
+            "smallestFirst",
+            "largestFirst",
+            "oldestFirst",
+            "newestFirst"
+    );
     private String selectedType;
-
     private ActivityPullorderDialogBinding binding;
 
-    private static final List<String> mTypes = Arrays.asList(
-        "random",
-        "alphabetic",
-        "smallestFirst",
-        "largestFirst",
-        "oldestFirst",
-        "newestFirst"
-    );
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = ActivityPullorderDialogBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        if (savedInstanceState == null) {
-            selectedType = getIntent().getStringExtra(EXTRA_PULL_ORDER);
+    protected void onCreate( Bundle savedInstanceState )
+    {
+        super.onCreate( savedInstanceState );
+        binding = ActivityPullorderDialogBinding.inflate( getLayoutInflater() );
+        setContentView( binding.getRoot() );
+        if ( savedInstanceState == null )
+        {
+            selectedType = getIntent().getStringExtra( EXTRA_PULL_ORDER );
         }
         initiateFinishBtn();
         initiateSpinner();
     }
 
-    private void initiateFinishBtn() {
-        binding.finishBtn.setOnClickListener(v -> {
+    private void initiateFinishBtn()
+    {
+        binding.finishBtn.setOnClickListener( v ->
+        {
             saveConfiguration();
             finish();
-        });
+        } );
     }
 
-    private void saveConfiguration() {
+    private void saveConfiguration()
+    {
         Intent intent = new Intent();
-        intent.putExtra(EXTRA_RESULT_PULL_ORDER, selectedType);
-        setResult(Activity.RESULT_OK, intent);
+        intent.putExtra( EXTRA_RESULT_PULL_ORDER, selectedType );
+        setResult( Activity.RESULT_OK, intent );
     }
 
-    private void initiateSpinner() {
-        binding.pullOrderTypeSpinner.setSelection(mTypes.indexOf(selectedType));
-        binding.pullOrderTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+    private void initiateSpinner()
+    {
+        binding.pullOrderTypeSpinner.setSelection( mTypes.indexOf( selectedType ) );
+        binding.pullOrderTypeSpinner.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener()
+        {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position != mTypes.indexOf(selectedType)) {
-                    selectedType = mTypes.get(position);
+            public void onItemSelected( AdapterView< ? > parent, View view, int position, long id )
+            {
+                if ( position != mTypes.indexOf( selectedType ) )
+                {
+                    selectedType = mTypes.get( position );
                 }
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+            public void onNothingSelected( AdapterView< ? > parent )
+            {
                 // This is not allowed.
             }
-        });
+        } );
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed()
+    {
         saveConfiguration();
         super.onBackPressed();
     }

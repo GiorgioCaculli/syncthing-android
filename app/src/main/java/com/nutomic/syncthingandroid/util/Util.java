@@ -7,11 +7,11 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Build;
 import android.preference.PreferenceManager;
-import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.nutomic.syncthingandroid.R;
@@ -26,11 +26,13 @@ import java.text.DecimalFormat;
 
 import eu.chainfire.libsuperuser.Shell;
 
-public class Util {
+public class Util
+{
 
     private static final String TAG = "SyncthingUtil";
 
-    private Util() {
+    private Util()
+    {
     }
 
     /**
@@ -38,13 +40,15 @@ public class Util {
      *
      * @param id The device ID to copy.
      */
-    public static void copyDeviceId(Context context, String id) {
-        ClipboardManager clipboard = (ClipboardManager)
-                context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText(context.getString(R.string.device_id), id);
-        clipboard.setPrimaryClip(clip);
-        if (android.os.Build.VERSION.SDK_INT < 33) {
-            Toast.makeText(context, R.string.device_id_copied_to_clipboard, Toast.LENGTH_SHORT)
+    public static void copyDeviceId( Context context, String id )
+    {
+        ClipboardManager clipboard = ( ClipboardManager )
+                context.getSystemService( Context.CLIPBOARD_SERVICE );
+        ClipData clip = ClipData.newPlainText( context.getString( R.string.device_id ), id );
+        clipboard.setPrimaryClip( clip );
+        if ( android.os.Build.VERSION.SDK_INT < 33 )
+        {
+            Toast.makeText( context, R.string.device_id_copied_to_clipboard, Toast.LENGTH_SHORT )
                     .show();
         }
     }
@@ -54,12 +58,16 @@ public class Util {
      * <p>
      * Based on http://stackoverflow.com/a/5599842
      */
-    public static String readableFileSize(Context context, long bytes) {
-        final String[] units = context.getResources().getStringArray(R.array.file_size_units);
-        if (bytes <= 0) return "0 " + units[0];
-        int digitGroups = (int) (Math.log10(bytes) / Math.log10(1024));
-        return new DecimalFormat("#,##0.#")
-                .format(bytes / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+    public static String readableFileSize( Context context, long bytes )
+    {
+        final String[] units = context.getResources().getStringArray( R.array.file_size_units );
+        if ( bytes <= 0 )
+        {
+            return "0 " + units[ 0 ];
+        }
+        int digitGroups = ( int ) ( Math.log10( bytes ) / Math.log10( 1024 ) );
+        return new DecimalFormat( "#,##0.#" )
+                .format( bytes / Math.pow( 1024, digitGroups ) ) + " " + units[ digitGroups ];
     }
 
     /**
@@ -68,13 +76,17 @@ public class Util {
      * <p>
      * Based on http://stackoverflow.com/a/5599842
      */
-    public static String readableTransferRate(Context context, long bits) {
-        final String[] units = context.getResources().getStringArray(R.array.transfer_rate_units);
+    public static String readableTransferRate( Context context, long bits )
+    {
+        final String[] units = context.getResources().getStringArray( R.array.transfer_rate_units );
         long bytes = bits / 8;
-        if (bytes <= 0) return "0 " + units[0];
-        int digitGroups = (int) (Math.log10(bytes) / Math.log10(1024));
-        return new DecimalFormat("#,##0.#")
-                .format(bytes / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+        if ( bytes <= 0 )
+        {
+            return "0 " + units[ 0 ];
+        }
+        int digitGroups = ( int ) ( Math.log10( bytes ) / Math.log10( 1024 ) );
+        return new DecimalFormat( "#,##0.#" )
+                .format( bytes / Math.pow( 1024, digitGroups ) ) + " " + units[ digitGroups ];
     }
 
     /**
@@ -87,30 +99,35 @@ public class Util {
      *
      * @return true if the operation was successfully performed. False otherwise.
      */
-    public static boolean fixAppDataPermissions(Context context) {
+    public static boolean fixAppDataPermissions( Context context )
+    {
         // We can safely assume that root magic is somehow available, because readConfig and saveChanges check for
         // read and write access before calling us.
         // Be paranoid :) and check if root is available.
         // Ignore the 'use_root' preference, because we might want to fix ther permission
         // just after the root option has been disabled.
-        if (!Shell.SU.available()) {
-            Log.e(TAG, "Root is not available. Cannot fix permissions.");
+        if ( !Shell.SU.available() )
+        {
+            Log.e( TAG, "Root is not available. Cannot fix permissions." );
             return false;
         }
 
         String packageName;
         ApplicationInfo appInfo;
-        try {
+        try
+        {
             packageName = context.getPackageName();
-            appInfo = context.getPackageManager().getApplicationInfo(packageName, 0);
+            appInfo = context.getPackageManager().getApplicationInfo( packageName, 0 );
 
-        } catch (NameNotFoundException e) {
+        }
+        catch ( NameNotFoundException e )
+        {
             // This should not happen!
             // One should always be able to retrieve the application info for its own package.
-            Log.w(TAG, "Error getting current package name", e);
+            Log.w( TAG, "Error getting current package name", e );
             return false;
         }
-        Log.d(TAG, "Uid of '" + packageName + "' is " + appInfo.uid);
+        Log.d( TAG, "Uid of '" + packageName + "' is " + appInfo.uid );
 
         // Get private app's "files" dir residing in "/data/data/[packageName]".
         String dir = context.getFilesDir().getAbsolutePath();
@@ -120,13 +137,16 @@ public class Util {
         // At least for those files residing in an application's data folder.
         // Simply reverting the type to its default should do the trick.
         cmd += "restorecon -R " + dir + "\n";
-        Log.d(TAG, "Running: '" + cmd);
-        int exitCode = runShellCommand(cmd, true);
-        if (exitCode == 0) {
-            Log.i(TAG, "Fixed app data permissions on '" + dir + "'.");
-        } else {
-            Log.w(TAG, "Failed to fix app data permissions on '" + dir + "'. Result: " +
-                Integer.toString(exitCode));
+        Log.d( TAG, "Running: '" + cmd );
+        int exitCode = runShellCommand( cmd, true );
+        if ( exitCode == 0 )
+        {
+            Log.i( TAG, "Fixed app data permissions on '" + dir + "'." );
+        }
+        else
+        {
+            Log.w( TAG, "Failed to fix app data permissions on '" + dir + "'. Result: " +
+                    exitCode );
         }
         return exitCode == 0;
     }
@@ -135,39 +155,44 @@ public class Util {
      * Returns if the syncthing binary would be able to write a file into
      * the given folder given the configured access level.
      */
-    public static boolean nativeBinaryCanWriteToPath(Context context, String absoluteFolderPath) {
+    public static boolean nativeBinaryCanWriteToPath( Context context, String absoluteFolderPath )
+    {
         final String TOUCH_FILE_NAME = ".stwritetest";
         Boolean useRoot = false;
-        Boolean prefUseRoot = PreferenceManager.getDefaultSharedPreferences(context)
-            .getBoolean(Constants.PREF_USE_ROOT, false);
-        if (prefUseRoot && Shell.SU.available()) {
+        Boolean prefUseRoot = PreferenceManager.getDefaultSharedPreferences( context )
+                .getBoolean( Constants.PREF_USE_ROOT, false );
+        if ( prefUseRoot && Shell.SU.available() )
+        {
             useRoot = true;
         }
 
         // Write permission test file.
         String touchFile = absoluteFolderPath + "/" + TOUCH_FILE_NAME;
-        int exitCode = runShellCommand("echo \"\" > \"" + touchFile + "\"\n", useRoot);
-        if (exitCode != 0) {
+        int exitCode = runShellCommand( "echo \"\" > \"" + touchFile + "\"\n", useRoot );
+        if ( exitCode != 0 )
+        {
             String error;
-            switch (exitCode) {
+            switch ( exitCode )
+            {
                 case 1:
                     error = "Permission denied";
                     break;
                 default:
                     error = "Shell execution failed";
             }
-            Log.i(TAG, "Failed to write test file '" + touchFile +
-                "', " + error);
+            Log.i( TAG, "Failed to write test file '" + touchFile +
+                    "', " + error );
             return false;
         }
 
         // Detected we have write permission.
-        Log.i(TAG, "Successfully wrote test file '" + touchFile + "'");
+        Log.i( TAG, "Successfully wrote test file '" + touchFile + "'" );
 
         // Remove test file.
-        if (runShellCommand("rm \"" + touchFile + "\"\n", useRoot) != 0) {
+        if ( runShellCommand( "rm \"" + touchFile + "\"\n", useRoot ) != 0 )
+        {
             // This is very unlikely to happen, so we have less error handling.
-            Log.i(TAG, "Failed to remove test file");
+            Log.i( TAG, "Failed to remove test file" );
         }
         return true;
     }
@@ -175,32 +200,44 @@ public class Util {
     /**
      * Run command in a shell and return the exit code.
      */
-    public static int runShellCommand(String cmd, Boolean useRoot) {
+    public static int runShellCommand( String cmd, Boolean useRoot )
+    {
         // Assume "failure" exit code if an error is caught.
         int exitCode = 255;
         Process shellProc = null;
         DataOutputStream shellOut = null;
-        try {
-            shellProc = Runtime.getRuntime().exec((useRoot) ? "su" : "sh");
-            shellOut = new DataOutputStream(shellProc.getOutputStream());
-            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(shellOut));
-            Log.d(TAG, "runShellCommand: " + cmd);
-            bufferedWriter.write(cmd);
+        try
+        {
+            shellProc = Runtime.getRuntime().exec( ( useRoot ) ? "su" : "sh" );
+            shellOut = new DataOutputStream( shellProc.getOutputStream() );
+            BufferedWriter bufferedWriter = new BufferedWriter( new OutputStreamWriter( shellOut ) );
+            Log.d( TAG, "runShellCommand: " + cmd );
+            bufferedWriter.write( cmd );
             bufferedWriter.flush();
             shellOut.close();
             shellOut = null;
             exitCode = shellProc.waitFor();
-        } catch (IOException | InterruptedException e) {
-            Log.w(TAG, "runShellCommand: Exception", e);
-        } finally {
-            try {
-                if (shellOut != null) {
+        }
+        catch ( IOException |
+                InterruptedException e )
+        {
+            Log.w( TAG, "runShellCommand: Exception", e );
+        }
+        finally
+        {
+            try
+            {
+                if ( shellOut != null )
+                {
                     shellOut.close();
                 }
-            } catch (IOException e) {
-                Log.w(TAG, "Failed to close shell stream", e);
             }
-            if (shellProc != null) {
+            catch ( IOException e )
+            {
+                Log.w( TAG, "Failed to close shell stream", e );
+            }
+            if ( shellProc != null )
+            {
                 shellProc.destroy();
             }
         }
@@ -211,15 +248,22 @@ public class Util {
      * Make sure that dialog is showing and activity is valid before dismissing dialog, to prevent
      * various crashes.
      */
-    public static void dismissDialogSafe(Dialog dialog, Activity activity) {
-        if (dialog == null || !dialog.isShowing())
+    public static void dismissDialogSafe( Dialog dialog, Activity activity )
+    {
+        if ( dialog == null || !dialog.isShowing() )
+        {
             return;
+        }
 
-        if (activity.isFinishing())
+        if ( activity.isFinishing() )
+        {
             return;
+        }
 
-        if (activity.isDestroyed())
+        if ( activity.isDestroyed() )
+        {
             return;
+        }
 
         dialog.dismiss();
     }
@@ -230,15 +274,16 @@ public class Util {
      * @param path String containing the path that needs formatting.
      * @return formatted file path as a string.
      */
-    public static String formatPath(String path) {
-        return new File(path).toURI().normalize().getPath();
+    public static String formatPath( String path )
+    {
+        return new File( path ).toURI().normalize().getPath();
     }
 
     /**
      * @return a themed AlertDialog builder.
      */
-    public static AlertDialog.Builder getAlertDialogBuilder(Context context)
+    public static AlertDialog.Builder getAlertDialogBuilder( Context context )
     {
-        return new MaterialAlertDialogBuilder(context);
+        return new MaterialAlertDialogBuilder( context );
     }
 }

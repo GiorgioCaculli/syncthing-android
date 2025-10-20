@@ -23,49 +23,69 @@ import javax.net.ssl.X509TrustManager;
  *
  * Based on http://stackoverflow.com/questions/16719959#16759793
  */
-class SyncthingTrustManager implements X509TrustManager {
+class SyncthingTrustManager implements X509TrustManager
+{
 
     private static final String TAG = "SyncthingTrustManager";
 
     private final File mHttpsCertPath;
 
-    SyncthingTrustManager(File httpsCertPath) {
+    SyncthingTrustManager( File httpsCertPath )
+    {
         mHttpsCertPath = httpsCertPath;
     }
 
     @Override
-    @SuppressLint("TrustAllX509TrustManager")
-    public void checkClientTrusted(X509Certificate[] chain, String authType)
-            throws CertificateException {
+    @SuppressLint( "TrustAllX509TrustManager" )
+    public void checkClientTrusted( X509Certificate[] chain, String authType )
+            throws CertificateException
+    {
     }
 
     /**
      * Verifies certs against public key of the local syncthing instance
      */
     @Override
-    public void checkServerTrusted(X509Certificate[] certs,
-                                   String authType) throws CertificateException {
+    public void checkServerTrusted( X509Certificate[] certs,
+                                    String authType ) throws CertificateException
+    {
         InputStream is = null;
-        try {
-            is = new FileInputStream(mHttpsCertPath);
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            X509Certificate ca = (X509Certificate) cf.generateCertificate(is);
-            for (X509Certificate cert : certs) {
-                cert.verify(ca.getPublicKey());
+        try
+        {
+            is = new FileInputStream( mHttpsCertPath );
+            CertificateFactory cf = CertificateFactory.getInstance( "X.509" );
+            X509Certificate ca = ( X509Certificate ) cf.generateCertificate( is );
+            for ( X509Certificate cert : certs )
+            {
+                cert.verify( ca.getPublicKey() );
             }
-        } catch (FileNotFoundException | NoSuchAlgorithmException | InvalidKeyException |
-                NoSuchProviderException | SignatureException e) {
-            throw new CertificateException("Untrusted Certificate!", e);
-        } finally {
-            try {
-                if (is != null)
+        }
+        catch ( FileNotFoundException |
+                NoSuchAlgorithmException |
+                InvalidKeyException |
+                NoSuchProviderException |
+                SignatureException e )
+        {
+            throw new CertificateException( "Untrusted Certificate!", e );
+        }
+        finally
+        {
+            try
+            {
+                if ( is != null )
+                {
                     is.close();
-            } catch (IOException e) {
-                Log.w(TAG, e);
+                }
+            }
+            catch ( IOException e )
+            {
+                Log.w( TAG, e );
             }
         }
     }
-    public X509Certificate[] getAcceptedIssuers() {
+
+    public X509Certificate[] getAcceptedIssuers()
+    {
         return null;
     }
 }

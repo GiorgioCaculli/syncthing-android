@@ -4,15 +4,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import androidx.fragment.app.Fragment;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
@@ -39,7 +40,8 @@ import java.util.TimerTask;
 /**
  * Displays information about the local device.
  */
-public class DrawerFragment extends Fragment implements View.OnClickListener {
+public class DrawerFragment extends Fragment implements View.OnClickListener
+{
 
     private static final String TAG = "DrawerFragment";
 
@@ -55,32 +57,39 @@ public class DrawerFragment extends Fragment implements View.OnClickListener {
     private MainActivity mActivity;
     private SharedPreferences sharedPreferences = null;
 
-    public void onDrawerOpened() {
+    public void onDrawerOpened()
+    {
         mTimer = new Timer();
-        mTimer.schedule(new TimerTask() {
+        mTimer.schedule( new TimerTask()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 updateGui();
             }
 
-        }, 0, Constants.GUI_UPDATE_INTERVAL);
+        }, 0, Constants.GUI_UPDATE_INTERVAL );
     }
 
     @Override
-    public void onResume() {
+    public void onResume()
+    {
         super.onResume();
         updateExitButtonVisibility();
     }
 
-    public void onDrawerClosed() {
-        if (mTimer != null) {
+    public void onDrawerClosed()
+    {
+        if ( mTimer != null )
+        {
             mTimer.cancel();
             mTimer = null;
         }
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroy()
+    {
         super.onDestroy();
         onDrawerClosed();
     }
@@ -89,81 +98,93 @@ public class DrawerFragment extends Fragment implements View.OnClickListener {
      * Populates views and menu.
      */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_drawer, container, false);
+    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState )
+    {
+        return inflater.inflate( R.layout.fragment_drawer, container, false );
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        mActivity = (MainActivity) getActivity();
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
+    public void onViewCreated( View view, Bundle savedInstanceState )
+    {
+        mActivity = ( MainActivity ) getActivity();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences( mActivity );
 
-        mRamUsage       = view.findViewById(R.id.ram_usage);
-        mDownload       = view.findViewById(R.id.download);
-        mUpload         = view.findViewById(R.id.upload);
-        mAnnounceServer = view.findViewById(R.id.announce_server);
-        mVersion        = view.findViewById(R.id.version);
-        mExitButton     = view.findViewById(R.id.drawerActionExit);
+        mRamUsage = view.findViewById( R.id.ram_usage );
+        mDownload = view.findViewById( R.id.download );
+        mUpload = view.findViewById( R.id.upload );
+        mAnnounceServer = view.findViewById( R.id.announce_server );
+        mVersion = view.findViewById( R.id.version );
+        mExitButton = view.findViewById( R.id.drawerActionExit );
 
-        view.findViewById(R.id.drawerActionWebGui)
-                .setOnClickListener(this);
-        view.findViewById(R.id.drawerActionRestart)
-                .setOnClickListener(this);
-        view.findViewById(R.id.drawerActionSettings)
-                .setOnClickListener(this);
-        view.findViewById(R.id.drawerActionShowQrCode)
-                .setOnClickListener(this);
-        mExitButton.setOnClickListener(this);
+        view.findViewById( R.id.drawerActionWebGui )
+                .setOnClickListener( this );
+        view.findViewById( R.id.drawerActionRestart )
+                .setOnClickListener( this );
+        view.findViewById( R.id.drawerActionSettings )
+                .setOnClickListener( this );
+        view.findViewById( R.id.drawerActionShowQrCode )
+                .setOnClickListener( this );
+        mExitButton.setOnClickListener( this );
 
         updateExitButtonVisibility();
     }
 
-    private void updateExitButtonVisibility() {
+    private void updateExitButtonVisibility()
+    {
         boolean alwaysInBackground = alwaysRunInBackground();
-        mExitButton.setVisibility(alwaysInBackground ? View.GONE : View.VISIBLE);
+        mExitButton.setVisibility( alwaysInBackground ? View.GONE : View.VISIBLE );
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mActivity = (MainActivity) getActivity();
+    public void onActivityCreated( Bundle savedInstanceState )
+    {
+        super.onActivityCreated( savedInstanceState );
+        mActivity = ( MainActivity ) getActivity();
 
-        if (savedInstanceState != null && savedInstanceState.getBoolean("active")) {
+        if ( savedInstanceState != null && savedInstanceState.getBoolean( "active" ) )
+        {
             onDrawerOpened();
         }
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean("active", mTimer != null);
+    public void onSaveInstanceState( Bundle outState )
+    {
+        super.onSaveInstanceState( outState );
+        outState.putBoolean( "active", mTimer != null );
     }
 
     /**
      * Invokes status callbacks.
      */
-    private void updateGui() {
-        MainActivity mainActivity = (MainActivity) getActivity();
-        if (mainActivity == null) {
+    private void updateGui()
+    {
+        MainActivity mainActivity = ( MainActivity ) getActivity();
+        if ( mainActivity == null )
+        {
             return;
         }
-        if (mainActivity.isFinishing()) {
+        if ( mainActivity.isFinishing() )
+        {
             return;
         }
 
         RestApi mApi = mainActivity.getApi();
-        if (mApi != null) {
-            mApi.getSystemInfo(this::onReceiveSystemInfo);
-            mApi.getSystemVersion(this::onReceiveSystemVersion);
-            mApi.getConnections(this::onReceiveConnections);
+        if ( mApi != null )
+        {
+            mApi.getSystemInfo( this::onReceiveSystemInfo );
+            mApi.getSystemVersion( this::onReceiveSystemVersion );
+            mApi.getConnections( this::onReceiveConnections );
         }
     }
 
     /**
      * This will not do anything if gui updates are already scheduled.
      */
-    public void requestGuiUpdate() {
-        if (mTimer == null) {
+    public void requestGuiUpdate()
+    {
+        if ( mTimer == null )
+        {
             updateGui();
         }
     }
@@ -171,76 +192,91 @@ public class DrawerFragment extends Fragment implements View.OnClickListener {
     /**
      * Populates views with status received via {@link RestApi#getSystemInfo}.
      */
-    private void onReceiveSystemInfo(SystemInfo info) {
-        if (getActivity() == null)
+    private void onReceiveSystemInfo( SystemInfo info )
+    {
+        if ( getActivity() == null )
+        {
             return;
+        }
         NumberFormat percentFormat = NumberFormat.getPercentInstance();
-        percentFormat.setMaximumFractionDigits(2);
-        mRamUsage.setText(Util.readableFileSize(mActivity, info.sys));
+        percentFormat.setMaximumFractionDigits( 2 );
+        mRamUsage.setText( Util.readableFileSize( mActivity, info.sys ) );
         int announceTotal = info.discoveryMethods;
         int announceConnected =
-                announceTotal - Optional.fromNullable(info.discoveryErrors).transform(Map::size).or(0);
-        mAnnounceServer.setText(String.format(Locale.getDefault(), "%1$d/%2$d",
-                                              announceConnected, announceTotal));
-        int color = (announceConnected > 0)
+                announceTotal - Optional.fromNullable( info.discoveryErrors ).transform( Map::size ).or( 0 );
+        mAnnounceServer.setText( String.format( Locale.getDefault(), "%1$d/%2$d",
+                announceConnected, announceTotal ) );
+        int color = ( announceConnected > 0 )
                 ? R.color.text_green
                 : R.color.text_red;
-        mAnnounceServer.setTextColor(ContextCompat.getColor(getContext(), color));
+        mAnnounceServer.setTextColor( ContextCompat.getColor( getContext(), color ) );
     }
 
     /**
      * Populates views with status received via {@link RestApi#getSystemInfo}.
      */
-    private void onReceiveSystemVersion(SystemVersion info) {
-        if (getActivity() == null)
+    private void onReceiveSystemVersion( SystemVersion info )
+    {
+        if ( getActivity() == null )
+        {
             return;
+        }
 
-        mVersion.setText(info.version);
+        mVersion.setText( info.version );
     }
 
     /**
      * Populates views with status received via {@link RestApi#getConnections}.
      */
-    private void onReceiveConnections(Connections connections) {
+    private void onReceiveConnections( Connections connections )
+    {
         Connections.Connection c = connections.total;
-        mDownload.setText(Util.readableTransferRate(mActivity, c.inBits));
-        mUpload.setText(Util.readableTransferRate(mActivity, c.outBits));
+        mDownload.setText( Util.readableTransferRate( mActivity, c.inBits ) );
+        mUpload.setText( Util.readableTransferRate( mActivity, c.outBits ) );
     }
 
     /**
      * Gets QRCode and displays it in a Dialog.
      */
 
-    private void showQrCode() {
+    private void showQrCode()
+    {
         RestApi restApi = mActivity.getApi();
-        if (restApi == null) {
-            Toast.makeText(mActivity, R.string.syncthing_terminated, Toast.LENGTH_SHORT).show();
+        if ( restApi == null )
+        {
+            Toast.makeText( mActivity, R.string.syncthing_terminated, Toast.LENGTH_SHORT ).show();
             return;
         }
-        try {
+        try
+        {
             String apiKey = restApi.getGui().apiKey;
             String deviceId = restApi.getLocalDevice().deviceID;
             URL url = restApi.getUrl();
             //The QRCode request takes one paramteer called "text", which is the text to be converted to a QRCode.
-            new ImageGetRequest(mActivity, url, ImageGetRequest.QR_CODE_GENERATOR, apiKey,
-                    ImmutableMap.of("text", deviceId),qrCodeBitmap -> {
-                mActivity.showQrCodeDialog(deviceId, qrCodeBitmap);
+            new ImageGetRequest( mActivity, url, ImageGetRequest.QR_CODE_GENERATOR, apiKey,
+                    ImmutableMap.of( "text", deviceId ), qrCodeBitmap ->
+            {
+                mActivity.showQrCodeDialog( deviceId, qrCodeBitmap );
                 mActivity.closeDrawer();
-            }, error -> Toast.makeText(mActivity, R.string.could_not_access_deviceid, Toast.LENGTH_SHORT).show());
-        } catch (Exception e) {
-            Log.e(TAG, "showQrCode", e);
+            }, error -> Toast.makeText( mActivity, R.string.could_not_access_deviceid, Toast.LENGTH_SHORT ).show() );
+        }
+        catch ( Exception e )
+        {
+            Log.e( TAG, "showQrCode", e );
         }
     }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
+    public void onClick( View v )
+    {
+        switch ( v.getId() )
+        {
             case R.id.drawerActionWebGui:
-                startActivity(new Intent(mActivity, WebGuiActivity.class));
+                startActivity( new Intent( mActivity, WebGuiActivity.class ) );
                 mActivity.closeDrawer();
                 break;
             case R.id.drawerActionSettings:
-                startActivity(new Intent(mActivity, SettingsActivity.class));
+                startActivity( new Intent( mActivity, SettingsActivity.class ) );
                 mActivity.closeDrawer();
                 break;
             case R.id.drawerActionRestart:
@@ -248,20 +284,26 @@ public class DrawerFragment extends Fragment implements View.OnClickListener {
                 mActivity.closeDrawer();
                 break;
             case R.id.drawerActionExit:
-                if (sharedPreferences != null && sharedPreferences.getBoolean(Constants.PREF_START_SERVICE_ON_BOOT, false)) {
+                if ( sharedPreferences != null && sharedPreferences.getBoolean( Constants.PREF_START_SERVICE_ON_BOOT, false ) )
+                {
                     /**
                      * App is running as a service. Show an explanation why exiting syncthing is an
                      * extraordinary request, then ask the user to confirm.
                      */
-                    AlertDialog mExitConfirmationDialog = Util.getAlertDialogBuilder(mActivity)
-                            .setTitle(R.string.dialog_exit_while_running_as_service_title)
-                            .setMessage(R.string.dialog_exit_while_running_as_service_message)
-                            .setPositiveButton(R.string.yes, (d, i) -> {
+                    AlertDialog mExitConfirmationDialog = Util.getAlertDialogBuilder( mActivity )
+                            .setTitle( R.string.dialog_exit_while_running_as_service_title )
+                            .setMessage( R.string.dialog_exit_while_running_as_service_message )
+                            .setPositiveButton( R.string.yes, ( d, i ) ->
+                            {
                                 doExit();
-                            })
-                            .setNegativeButton(R.string.no, (d, i) -> {})
+                            } )
+                            .setNegativeButton( R.string.no, ( d, i ) ->
+                            {
+                            } )
                             .show();
-                } else {
+                }
+                else
+                {
                     // App is not running as a service.
                     doExit();
                 }
@@ -273,17 +315,20 @@ public class DrawerFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    private boolean alwaysRunInBackground() {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        return sp.getBoolean(Constants.PREF_START_SERVICE_ON_BOOT, false);
+    private boolean alwaysRunInBackground()
+    {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences( getActivity() );
+        return sp.getBoolean( Constants.PREF_START_SERVICE_ON_BOOT, false );
     }
 
-    private void doExit() {
-        if (mActivity == null || mActivity.isFinishing()) {
+    private void doExit()
+    {
+        if ( mActivity == null || mActivity.isFinishing() )
+        {
             return;
         }
-        Log.i(TAG, "Exiting app on user request");
-        mActivity.stopService(new Intent(mActivity, SyncthingService.class));
+        Log.i( TAG, "Exiting app on user request" );
+        mActivity.stopService( new Intent( mActivity, SyncthingService.class ) );
         mActivity.finishAndRemoveTask();
     }
 }

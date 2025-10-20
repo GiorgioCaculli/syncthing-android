@@ -11,8 +11,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class Folder {
+public class Folder
+{
 
+    public final boolean ignorePerms = true;
+    private final List< Folder.Device > devices = new ArrayList<>();
     public String id;
     public String label;
     public String filesystemType = "basic";
@@ -20,9 +23,7 @@ public class Folder {
     public String type = Constants.FOLDER_TYPE_SEND_RECEIVE;
     public boolean fsWatcherEnabled = true;
     public int fsWatcherDelayS = 10;
-    private List<Folder.Device> devices = new ArrayList<>();
     public int rescanIntervalS;
-    public final boolean ignorePerms = true;
     public boolean autoNormalize = true;
     public MinDiskFree minDiskFree;
     public Versioning versioning;
@@ -42,46 +43,58 @@ public class Folder {
     public String markerName = ".stfolder";
     public String invalid;
 
-    public static class Versioning implements Serializable {
-        public String type;
-        public Map<String, String> params = new HashMap<>();
-    }
-
-    public static class MinDiskFree {
-        public float value;
-        public String unit;
-    }
-
-    public void addDevice(String deviceId) {
+    public void addDevice( String deviceId )
+    {
         Device d = new Device();
         d.deviceID = deviceId;
-        devices.add(d);
+        devices.add( d );
     }
 
-    public Device getDevice(String deviceId) {
-        for (Device d : devices) {
-            if (d.deviceID.equals(deviceId)) {
+    public Device getDevice( String deviceId )
+    {
+        for ( Device d : devices )
+        {
+            if ( d.deviceID.equals( deviceId ) )
+            {
                 return d;
             }
         }
         return null;
     }
 
-    public void removeDevice(String deviceId) {
-        for (Iterator<Device> it = devices.iterator(); it.hasNext();) {
+    public void removeDevice( String deviceId )
+    {
+        for ( Iterator< Device > it = devices.iterator();
+              it.hasNext(); )
+        {
             String currentId = it.next().deviceID;
-            if (currentId.equals(deviceId)) {
+            if ( currentId.equals( deviceId ) )
+            {
                 it.remove();
             }
         }
     }
 
     @Override
-    public String toString() {
-        return !TextUtils.isEmpty(label) ? label : id;
+    public String toString()
+    {
+        return !TextUtils.isEmpty( label ) ? label : id;
     }
 
-    public class Device {
+    public static class Versioning implements Serializable
+    {
+        public String type;
+        public Map< String, String > params = new HashMap<>();
+    }
+
+    public static class MinDiskFree
+    {
+        public float value;
+        public String unit;
+    }
+
+    public class Device
+    {
         public String deviceID;
         public String introducedBy;
         public String encryptionPassword;

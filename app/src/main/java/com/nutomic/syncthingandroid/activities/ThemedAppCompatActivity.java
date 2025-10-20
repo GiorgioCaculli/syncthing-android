@@ -2,6 +2,7 @@ package com.nutomic.syncthingandroid.activities;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
@@ -13,7 +14,8 @@ import javax.inject.Inject;
 /**
  * Provides a themed instance of AppCompatActivity.
  */
-public class ThemedAppCompatActivity extends AppCompatActivity {
+public class ThemedAppCompatActivity extends AppCompatActivity
+{
 
     private static final String FOLLOW_SYSTEM = "-1";
 
@@ -21,13 +23,14 @@ public class ThemedAppCompatActivity extends AppCompatActivity {
     SharedPreferences mPreferences;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        ((SyncthingApp) getApplication()).component().inject(this);
+    protected void onCreate( Bundle savedInstanceState )
+    {
+        ( ( SyncthingApp ) getApplication() ).component().inject( this );
         // Load theme.
         //For api level below 28, Follow system fall backs to light mode
-        Integer prefAppTheme = Integer.parseInt(mPreferences.getString(Constants.PREF_APP_THEME, FOLLOW_SYSTEM));
-        AppCompatDelegate.setDefaultNightMode(prefAppTheme);
-        super.onCreate(savedInstanceState);
+        Integer prefAppTheme = Integer.parseInt( mPreferences.getString( Constants.PREF_APP_THEME, FOLLOW_SYSTEM ) );
+        AppCompatDelegate.setDefaultNightMode( prefAppTheme );
+        super.onCreate( savedInstanceState );
     }
 
 }

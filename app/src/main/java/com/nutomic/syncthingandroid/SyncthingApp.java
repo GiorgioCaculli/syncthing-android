@@ -8,22 +8,25 @@ import com.nutomic.syncthingandroid.util.Languages;
 
 import javax.inject.Inject;
 
-public class SyncthingApp extends Application {
+public class SyncthingApp extends Application
+{
 
-    @Inject DaggerComponent mComponent;
+    @Inject
+    DaggerComponent mComponent;
 
     @Override
-    public void onCreate() {
-        DynamicColors.applyToActivitiesIfAvailable(this);
+    public void onCreate()
+    {
+        DynamicColors.applyToActivitiesIfAvailable( this );
 
         super.onCreate();
 
         DaggerDaggerComponent.builder()
-                .syncthingModule(new SyncthingModule(this))
+                .syncthingModule( new SyncthingModule( this ) )
                 .build()
-                .inject(this);
+                .inject( this );
 
-        new Languages(this).setLanguage(this);
+        new Languages( this ).setLanguage( this );
 
         // The main point here is to use a VM policy without
         // `detectFileUriExposure`, as that leads to exceptions when e.g.
@@ -33,10 +36,11 @@ public class SyncthingApp extends Application {
                 .detectAll()
                 .penaltyLog()
                 .build();
-        StrictMode.setVmPolicy(policy);
+        StrictMode.setVmPolicy( policy );
     }
 
-    public DaggerComponent component() {
+    public DaggerComponent component()
+    {
         return mComponent;
     }
 }

@@ -11,23 +11,27 @@ import dagger.Module;
 import dagger.Provides;
 
 @Module
-public class SyncthingModule {
+public class SyncthingModule
+{
 
     private final SyncthingApp mApp;
 
-    public SyncthingModule(SyncthingApp app) {
+    public SyncthingModule( SyncthingApp app )
+    {
         mApp = app;
     }
 
     @Provides
     @Singleton
-    public SharedPreferences getPreferences() {
-        return PreferenceManager.getDefaultSharedPreferences(mApp);
+    public SharedPreferences getPreferences()
+    {
+        return PreferenceManager.getDefaultSharedPreferences( mApp );
     }
 
     @Provides
     @Singleton
-    public NotificationHandler getNotificationHandler() {
-        return new NotificationHandler(mApp);
+    public NotificationHandler getNotificationHandler()
+    {
+        return new NotificationHandler( mApp );
     }
 }

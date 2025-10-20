@@ -2,15 +2,17 @@ package com.nutomic.syncthingandroid.model;
 
 import java.util.List;
 
-public class Config {
+public class Config
+{
     public int version;
-    public List<Device> devices;
-    public List<Folder> folders;
+    public List< Device > devices;
+    public List< Folder > folders;
     public Gui gui;
     public Options options;
-    public List<RemoteIgnoredDevice> remoteIgnoredDevices;
+    public List< RemoteIgnoredDevice > remoteIgnoredDevices;
 
-    public class Gui {
+    public class Gui
+    {
         public boolean enabled;
         public String address;
         public String user;

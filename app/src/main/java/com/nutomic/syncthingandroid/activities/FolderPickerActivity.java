@@ -9,11 +9,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +21,11 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 
 import com.google.common.collect.Sets;
 import com.nutomic.syncthingandroid.R;
@@ -47,69 +47,72 @@ import javax.inject.Inject;
  * Activity that allows selecting a directory in the local file system.
  */
 public class FolderPickerActivity extends SyncthingActivity
-        implements AdapterView.OnItemClickListener, SyncthingService.OnServiceStateChangeListener {
-
-    private static final String EXTRA_INITIAL_DIRECTORY =
-            "com.nutomic.syncthingandroid.activities.FolderPickerActivity.INITIAL_DIRECTORY";
-
-    private static final String EXTRA_ROOT_DIRECTORY =
-            "com.nutomic.syncthingandroid.activities.FolderPickerActivity.ROOT_DIRECTORY";
+        implements AdapterView.OnItemClickListener, SyncthingService.OnServiceStateChangeListener
+{
 
     public static final String EXTRA_RESULT_DIRECTORY =
             "com.nutomic.syncthingandroid.activities.FolderPickerActivity.RESULT_DIRECTORY";
-
     public static final int DIRECTORY_REQUEST_CODE = 234;
-
+    private static final String EXTRA_INITIAL_DIRECTORY =
+            "com.nutomic.syncthingandroid.activities.FolderPickerActivity.INITIAL_DIRECTORY";
+    private static final String EXTRA_ROOT_DIRECTORY =
+            "com.nutomic.syncthingandroid.activities.FolderPickerActivity.ROOT_DIRECTORY";
+    @Inject
+    SharedPreferences mPreferences;
     private ListView mListView;
     private FileAdapter mFilesAdapter;
     private RootsAdapter mRootsAdapter;
-
     /**
      * Location of null means that the list of roots is displayed.
      */
     private File mLocation;
 
-    @Inject
-    SharedPreferences mPreferences;
+    public static Intent createIntent( Context context, String initialDirectory, @Nullable String rootDirectory )
+    {
+        Intent intent = new Intent( context, FolderPickerActivity.class );
 
-    public static Intent createIntent(Context context, String initialDirectory, @Nullable String rootDirectory) {
-        Intent intent = new Intent(context, FolderPickerActivity.class);
-
-        if (!TextUtils.isEmpty(initialDirectory)) {
-            intent.putExtra(EXTRA_INITIAL_DIRECTORY, initialDirectory);
+        if ( !TextUtils.isEmpty( initialDirectory ) )
+        {
+            intent.putExtra( EXTRA_INITIAL_DIRECTORY, initialDirectory );
         }
 
-        if (!TextUtils.isEmpty(rootDirectory)) {
-            intent.putExtra(EXTRA_ROOT_DIRECTORY, rootDirectory);
+        if ( !TextUtils.isEmpty( rootDirectory ) )
+        {
+            intent.putExtra( EXTRA_ROOT_DIRECTORY, rootDirectory );
         }
 
         return intent;
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ((SyncthingApp) getApplication()).component().inject(this);
+    protected void onCreate( Bundle savedInstanceState )
+    {
+        super.onCreate( savedInstanceState );
+        ( ( SyncthingApp ) getApplication() ).component().inject( this );
 
-        setContentView(R.layout.activity_folder_picker);
-        mListView = findViewById(android.R.id.list);
-        mListView.setOnItemClickListener(this);
-        mListView.setEmptyView(findViewById(android.R.id.empty));
-        mFilesAdapter = new FileAdapter(this);
-        mRootsAdapter = new RootsAdapter(this);
-        mListView.setAdapter(mFilesAdapter);
+        setContentView( R.layout.activity_folder_picker );
+        mListView = findViewById( android.R.id.list );
+        mListView.setOnItemClickListener( this );
+        mListView.setEmptyView( findViewById( android.R.id.empty ) );
+        mFilesAdapter = new FileAdapter( this );
+        mRootsAdapter = new RootsAdapter( this );
+        mListView.setAdapter( mFilesAdapter );
 
         populateRoots();
 
-        if (getIntent().hasExtra(EXTRA_INITIAL_DIRECTORY)) {
-            displayFolder(new File(getIntent().getStringExtra(EXTRA_INITIAL_DIRECTORY)));
-        } else {
+        if ( getIntent().hasExtra( EXTRA_INITIAL_DIRECTORY ) )
+        {
+            displayFolder( new File( getIntent().getStringExtra( EXTRA_INITIAL_DIRECTORY ) ) );
+        }
+        else
+        {
             displayRoot();
         }
 
-        Boolean prefUseRoot = mPreferences.getBoolean(Constants.PREF_USE_ROOT, false);
-        if (!prefUseRoot) {
-            Toast.makeText(this, R.string.kitkat_external_storage_warning, Toast.LENGTH_LONG)
+        Boolean prefUseRoot = mPreferences.getBoolean( Constants.PREF_USE_ROOT, false );
+        if ( !prefUseRoot )
+        {
+            Toast.makeText( this, R.string.kitkat_external_storage_warning, Toast.LENGTH_LONG )
                     .show();
         }
     }
@@ -119,194 +122,179 @@ public class FolderPickerActivity extends SyncthingActivity
      * all available storage devices/folders from various APIs are inserted into
      * {@link #mRootsAdapter}.
      */
-    @SuppressLint("NewApi")
-    private void populateRoots() {
-        ArrayList<File> roots = new ArrayList<>();
-        roots.addAll(Arrays.asList(getExternalFilesDirs(null)));
-        roots.remove(getExternalFilesDir(null));
+    @SuppressLint( "NewApi" )
+    private void populateRoots()
+    {
+        ArrayList< File > roots = new ArrayList<>();
+        roots.addAll( Arrays.asList( getExternalFilesDirs( null ) ) );
+        roots.remove( getExternalFilesDir( null ) );
 
-        String rootDir = getIntent().getStringExtra(EXTRA_ROOT_DIRECTORY);
-        if (getIntent().hasExtra(EXTRA_ROOT_DIRECTORY) && !TextUtils.isEmpty(rootDir)) {
-            roots.add(new File(rootDir));
-        } else {
-            roots.add(Environment.getExternalStorageDirectory());
-            roots.add(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC));
-            roots.add(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES));
-            roots.add(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
-            roots.add(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM));
-            roots.add(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS));
+        String rootDir = getIntent().getStringExtra( EXTRA_ROOT_DIRECTORY );
+        if ( getIntent().hasExtra( EXTRA_ROOT_DIRECTORY ) && !TextUtils.isEmpty( rootDir ) )
+        {
+            roots.add( new File( rootDir ) );
+        }
+        else
+        {
+            roots.add( Environment.getExternalStorageDirectory() );
+            roots.add( Environment.getExternalStoragePublicDirectory( Environment.DIRECTORY_MUSIC ) );
+            roots.add( Environment.getExternalStoragePublicDirectory( Environment.DIRECTORY_PICTURES ) );
+            roots.add( Environment.getExternalStoragePublicDirectory( Environment.DIRECTORY_DOWNLOADS ) );
+            roots.add( Environment.getExternalStoragePublicDirectory( Environment.DIRECTORY_DCIM ) );
+            roots.add( Environment.getExternalStoragePublicDirectory( Environment.DIRECTORY_DOCUMENTS ) );
 
             // Add paths that might not be accessible to Syncthing.
-            if (mPreferences.getBoolean("advanced_folder_picker", false)) {
-                Collections.addAll(roots, new File("/storage/").listFiles());
-                roots.add(new File("/"));
+            if ( mPreferences.getBoolean( "advanced_folder_picker", false ) )
+            {
+                Collections.addAll( roots, new File( "/storage/" ).listFiles() );
+                roots.add( new File( "/" ) );
             }
         }
         // Remove any invalid directories.
-        Iterator<File> it = roots.iterator();
-        while (it.hasNext()) {
+        Iterator< File > it = roots.iterator();
+        while ( it.hasNext() )
+        {
             File f = it.next();
-            if (f == null || !f.exists() || !f.isDirectory()) {
+            if ( f == null || !f.exists() || !f.isDirectory() )
+            {
                 it.remove();
             }
         }
 
-        mRootsAdapter.addAll(Sets.newTreeSet(roots));
+        mRootsAdapter.addAll( Sets.newTreeSet( roots ) );
     }
 
     @Override
-    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-        super.onServiceConnected(componentName, iBinder);
-        SyncthingServiceBinder syncthingServiceBinder = (SyncthingServiceBinder) iBinder;
-        syncthingServiceBinder.getService().registerOnServiceStateChangeListener(this);
+    public void onServiceConnected( ComponentName componentName, IBinder iBinder )
+    {
+        super.onServiceConnected( componentName, iBinder );
+        SyncthingServiceBinder syncthingServiceBinder = ( SyncthingServiceBinder ) iBinder;
+        syncthingServiceBinder.getService().registerOnServiceStateChangeListener( this );
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onDestroy()
+    {
         super.onDestroy();
         SyncthingService syncthingService = getService();
-        if (syncthingService != null) {
-            syncthingService.unregisterOnServiceStateChangeListener(this::onServiceStateChange);
+        if ( syncthingService != null )
+        {
+            syncthingService.unregisterOnServiceStateChangeListener( this::onServiceStateChange );
         }
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (mListView.getAdapter() == mRootsAdapter)
+    public boolean onCreateOptionsMenu( Menu menu )
+    {
+        if ( mListView.getAdapter() == mRootsAdapter )
+        {
             return true;
+        }
 
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.folder_picker, menu);
+        getMenuInflater().inflate( R.menu.folder_picker, menu );
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+    public boolean onOptionsItemSelected( MenuItem item )
+    {
+        switch ( item.getItemId() )
+        {
             case R.id.create_folder:
-                final EditText et = new EditText(this);
-                AlertDialog dialog = Util.getAlertDialogBuilder(this)
-                        .setTitle(R.string.create_folder)
-                        .setView(et)
-                        .setPositiveButton(android.R.string.ok,
-                                (dialogInterface, i) -> createFolder(et.getText().toString())
+                final EditText et = new EditText( this );
+                AlertDialog dialog = Util.getAlertDialogBuilder( this )
+                        .setTitle( R.string.create_folder )
+                        .setView( et )
+                        .setPositiveButton( android.R.string.ok,
+                                ( dialogInterface, i ) -> createFolder( et.getText().toString() )
                         )
-                        .setNegativeButton(android.R.string.cancel, null)
+                        .setNegativeButton( android.R.string.cancel, null )
                         .create();
-                dialog.setOnShowListener(dialogInterface -> ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
-                        .showSoftInput(et, InputMethodManager.SHOW_IMPLICIT));
+                dialog.setOnShowListener( dialogInterface -> ( ( InputMethodManager ) getSystemService( Context.INPUT_METHOD_SERVICE ) )
+                        .showSoftInput( et, InputMethodManager.SHOW_IMPLICIT ) );
                 dialog.show();
                 return true;
             case R.id.select:
                 Intent intent = new Intent()
-                        .putExtra(EXTRA_RESULT_DIRECTORY, Util.formatPath(mLocation.getAbsolutePath()));
-                setResult(Activity.RESULT_OK, intent);
+                        .putExtra( EXTRA_RESULT_DIRECTORY, Util.formatPath( mLocation.getAbsolutePath() ) );
+                setResult( Activity.RESULT_OK, intent );
                 finish();
                 return true;
             case android.R.id.home:
                 finish();
                 return true;
             default:
-                return super.onOptionsItemSelected(item);
+                return super.onOptionsItemSelected( item );
         }
     }
 
     /**
      * Creates a new folder with the given name and enters it.
      */
-    private void createFolder(String name) {
-        File newFolder = new File(mLocation, name);
-        if (newFolder.mkdir()) {
-            displayFolder(newFolder);
-        } else {
-            Toast.makeText(this, R.string.create_folder_failed, Toast.LENGTH_SHORT).show();
+    private void createFolder( String name )
+    {
+        File newFolder = new File( mLocation, name );
+        if ( newFolder.mkdir() )
+        {
+            displayFolder( newFolder );
+        }
+        else
+        {
+            Toast.makeText( this, R.string.create_folder_failed, Toast.LENGTH_SHORT ).show();
         }
     }
 
     /**
      * Refreshes the ListView to show the contents of the folder in {@code }mLocation.peek()}.
      */
-    private void displayFolder(File folder) {
+    private void displayFolder( File folder )
+    {
         mLocation = folder;
         mFilesAdapter.clear();
         File[] contents = mLocation.listFiles();
         // In case we don't have read access to the folder, just display nothing.
-        if (contents == null)
+        if ( contents == null )
+        {
             contents = new File[]{};
-
-        Arrays.sort(contents, (f1, f2) -> {
-            if (f1.isDirectory() && f2.isFile())
-                return -1;
-            if (f1.isFile() && f2.isDirectory())
-                return 1;
-            return f1.getName().compareTo(f2.getName());
-        });
-
-        for (File f : contents) {
-            mFilesAdapter.add(f);
         }
-        mListView.setAdapter(mFilesAdapter);
+
+        Arrays.sort( contents, ( f1, f2 ) ->
+        {
+            if ( f1.isDirectory() && f2.isFile() )
+            {
+                return -1;
+            }
+            if ( f1.isFile() && f2.isDirectory() )
+            {
+                return 1;
+            }
+            return f1.getName().compareTo( f2.getName() );
+        } );
+
+        for ( File f : contents )
+        {
+            mFilesAdapter.add( f );
+        }
+        mListView.setAdapter( mFilesAdapter );
     }
 
     @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        @SuppressWarnings("unchecked")
-        ArrayAdapter<File> adapter = (ArrayAdapter<File>) mListView.getAdapter();
-        File f = adapter.getItem(i);
-        if (f.isDirectory()) {
-            displayFolder(f);
+    public void onItemClick( AdapterView< ? > adapterView, View view, int i, long l )
+    {
+        @SuppressWarnings( "unchecked" )
+        ArrayAdapter< File > adapter = ( ArrayAdapter< File > ) mListView.getAdapter();
+        File f = adapter.getItem( i );
+        if ( f.isDirectory() )
+        {
+            displayFolder( f );
             invalidateOptions();
         }
     }
 
-    private void invalidateOptions() {
+    private void invalidateOptions()
+    {
         invalidateOptionsMenu();
-    }
-
-    private class FileAdapter extends ArrayAdapter<File> {
-
-        public FileAdapter(Context context) {
-            super(context, R.layout.item_folder_picker);
-        }
-
-        @Override
-        @NonNull
-        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-            convertView = super.getView(position, convertView, parent);
-            TextView title = convertView.findViewById(android.R.id.text1);
-            File f = getItem(position);
-            title.setText(f.getName());
-            int textColor = (f.isDirectory())
-                    ? android.R.color.primary_text_light
-                    : android.R.color.tertiary_text_light;
-            title.setTextColor(ContextCompat.getColor(getContext(), textColor));
-
-            return convertView;
-        }
-    }
-
-    private class RootsAdapter extends ArrayAdapter<File> {
-
-        public RootsAdapter(Context context) {
-            super(context, android.R.layout.simple_list_item_1);
-        }
-
-        @Override
-        @NonNull
-        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-            convertView = super.getView(position, convertView, parent);
-            TextView title = convertView.findViewById(android.R.id.text1);
-            title.setText(getItem(position).getAbsolutePath());
-            return convertView;
-        }
-
-        public boolean contains(File file) {
-            for (int i = 0; i < getCount(); i++) {
-                if (getItem(i).equals(file))
-                    return true;
-            }
-            return false;
-        }
     }
 
     /**
@@ -316,21 +304,29 @@ public class FolderPickerActivity extends SyncthingActivity
      * root folder, we cancel.
      */
     @Override
-    public void onBackPressed() {
-        if (!mRootsAdapter.contains(mLocation) && mLocation != null) {
-            displayFolder(mLocation.getParentFile());
-        } else if (mRootsAdapter.contains(mLocation) && mRootsAdapter.getCount() > 1) {
+    public void onBackPressed()
+    {
+        if ( !mRootsAdapter.contains( mLocation ) && mLocation != null )
+        {
+            displayFolder( mLocation.getParentFile() );
+        }
+        else if ( mRootsAdapter.contains( mLocation ) && mRootsAdapter.getCount() > 1 )
+        {
             displayRoot();
-        } else {
-            setResult(Activity.RESULT_CANCELED);
+        }
+        else
+        {
+            setResult( Activity.RESULT_CANCELED );
             finish();
         }
     }
 
     @Override
-    public void onServiceStateChange(SyncthingService.State currentState) {
-        if (!isFinishing() && currentState != SyncthingService.State.ACTIVE) {
-            setResult(Activity.RESULT_CANCELED);
+    public void onServiceStateChange( SyncthingService.State currentState )
+    {
+        if ( !isFinishing() && currentState != SyncthingService.State.ACTIVE )
+        {
+            setResult( Activity.RESULT_CANCELED );
             finish();
         }
     }
@@ -339,15 +335,77 @@ public class FolderPickerActivity extends SyncthingActivity
      * Displays a list of all available roots, or if there is only one root, the
      * contents of that folder.
      */
-    private void displayRoot() {
+    private void displayRoot()
+    {
         mFilesAdapter.clear();
-        if (mRootsAdapter.getCount() == 1) {
-            displayFolder(mRootsAdapter.getItem(0));
-        } else {
-            mListView.setAdapter(mRootsAdapter);
+        if ( mRootsAdapter.getCount() == 1 )
+        {
+            displayFolder( mRootsAdapter.getItem( 0 ) );
+        }
+        else
+        {
+            mListView.setAdapter( mRootsAdapter );
             mLocation = null;
         }
         invalidateOptions();
+    }
+
+    private class FileAdapter extends ArrayAdapter< File >
+    {
+
+        public FileAdapter( Context context )
+        {
+            super( context, R.layout.item_folder_picker );
+        }
+
+        @Override
+        @NonNull
+        public View getView( int position, View convertView, @NonNull ViewGroup parent )
+        {
+            convertView = super.getView( position, convertView, parent );
+            TextView title = convertView.findViewById( android.R.id.text1 );
+            File f = getItem( position );
+            title.setText( f.getName() );
+            int textColor = ( f.isDirectory() )
+                    ? android.R.color.primary_text_light
+                    : android.R.color.tertiary_text_light;
+            title.setTextColor( ContextCompat.getColor( getContext(), textColor ) );
+
+            return convertView;
+        }
+    }
+
+    private class RootsAdapter extends ArrayAdapter< File >
+    {
+
+        public RootsAdapter( Context context )
+        {
+            super( context, android.R.layout.simple_list_item_1 );
+        }
+
+        @Override
+        @NonNull
+        public View getView( int position, View convertView, @NonNull ViewGroup parent )
+        {
+            convertView = super.getView( position, convertView, parent );
+            TextView title = convertView.findViewById( android.R.id.text1 );
+            title.setText( getItem( position ).getAbsolutePath() );
+            return convertView;
+        }
+
+        public boolean contains( File file )
+        {
+            for ( int i = 0;
+                  i < getCount();
+                  i++ )
+            {
+                if ( getItem( i ).equals( file ) )
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
 }

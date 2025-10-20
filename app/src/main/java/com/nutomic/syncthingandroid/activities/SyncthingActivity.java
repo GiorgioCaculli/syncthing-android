@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+
 import androidx.appcompat.widget.Toolbar;
 
 import com.annimon.stream.Stream;
@@ -19,90 +20,103 @@ import java.util.LinkedList;
 /**
  * Connects to {@link SyncthingService} and provides access to it.
  */
-public abstract class SyncthingActivity extends ThemedAppCompatActivity implements ServiceConnection {
+public abstract class SyncthingActivity extends ThemedAppCompatActivity implements ServiceConnection
+{
 
     public static final String EXTRA_KEY_GENERATION_IN_PROGRESS = "com.nutomic.syncthing-android.SyncthingActivity.KEY_GENERATION_IN_PROGRESS";
-
+    private final LinkedList< OnServiceConnectedListener > mServiceConnectedListeners = new LinkedList<>();
     private SyncthingService mSyncthingService;
-
-    private final LinkedList<OnServiceConnectedListener> mServiceConnectedListeners = new LinkedList<>();
-
-    /**
-     * To be used for Fragments.
-     */
-    public interface OnServiceConnectedListener {
-        void onServiceConnected();
-    }
 
     /**
      * Look for a Toolbar in the layout and bind it as the activity's actionbar with reasonable
      * defaults.
-     *
+     * <p>
      * The Toolbar must exist in the content view and have an id of R.id.toolbar. Trying to call
      * getSupportActionBar before this Activity's onPostCreate will cause a crash.
      */
     @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
+    protected void onPostCreate( Bundle savedInstanceState )
+    {
+        super.onPostCreate( savedInstanceState );
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        if (toolbar == null)
+        Toolbar toolbar = findViewById( R.id.toolbar );
+        if ( toolbar == null )
+        {
             return;
+        }
 
-        setSupportActionBar(toolbar);
+        setSupportActionBar( toolbar );
         //noinspection ConstantConditions
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled( true );
     }
 
     @Override
-    protected void onPause() {
-        unbindService(this);
+    protected void onPause()
+    {
+        unbindService( this );
         super.onPause();
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
-        bindService(new Intent(this, SyncthingService.class), this, Context.BIND_AUTO_CREATE);
+        bindService( new Intent( this, SyncthingService.class ), this, Context.BIND_AUTO_CREATE );
     }
 
     @Override
-    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-        SyncthingServiceBinder syncthingServiceBinder = (SyncthingServiceBinder) iBinder;
+    public void onServiceConnected( ComponentName componentName, IBinder iBinder )
+    {
+        SyncthingServiceBinder syncthingServiceBinder = ( SyncthingServiceBinder ) iBinder;
         mSyncthingService = syncthingServiceBinder.getService();
-        Stream.of(mServiceConnectedListeners).forEach(OnServiceConnectedListener::onServiceConnected);
+        Stream.of( mServiceConnectedListeners ).forEach( OnServiceConnectedListener::onServiceConnected );
         mServiceConnectedListeners.clear();
     }
 
     @Override
-    public void onServiceDisconnected(ComponentName componentName) {
+    public void onServiceDisconnected( ComponentName componentName )
+    {
         mSyncthingService = null;
     }
 
     /**
      * Used for Fragments to use the Activity's service connection.
      */
-    void registerOnServiceConnectedListener(OnServiceConnectedListener listener) {
-        if (mSyncthingService != null) {
+    void registerOnServiceConnectedListener( OnServiceConnectedListener listener )
+    {
+        if ( mSyncthingService != null )
+        {
             listener.onServiceConnected();
-        } else {
-            mServiceConnectedListeners.addLast(listener);
+        }
+        else
+        {
+            mServiceConnectedListeners.addLast( listener );
         }
     }
 
     /**
      * Returns service object (or null if not bound).
      */
-    SyncthingService getService() {
+    SyncthingService getService()
+    {
         return mSyncthingService;
     }
 
     /**
      * Returns RestApi instance, or null if SyncthingService is not yet connected.
      */
-    public RestApi getApi() {
-        return (getService() != null)
+    public RestApi getApi()
+    {
+        return ( getService() != null )
                 ? getService().getApi()
                 : null;
+    }
+
+    /**
+     * To be used for Fragments.
+     */
+    public interface OnServiceConnectedListener
+    {
+        void onServiceConnected();
     }
 }

@@ -2,7 +2,8 @@ package com.nutomic.syncthingandroid.model;
 
 import android.text.TextUtils;
 
-public class IgnoredFolder {
+public class IgnoredFolder
+{
     public String time = "";
     public String id = "";
     public String label = "";
@@ -10,9 +11,10 @@ public class IgnoredFolder {
     /**
      * Returns the folder label, or the first characters of the ID if the label is empty.
      */
-    public String getDisplayLabel() {
-        return (TextUtils.isEmpty(label))
-                ? id.substring(0, 7)
+    public String getDisplayLabel()
+    {
+        return ( TextUtils.isEmpty( label ) )
+                ? id.substring( 0, 7 )
                 : label;
     }
 }
