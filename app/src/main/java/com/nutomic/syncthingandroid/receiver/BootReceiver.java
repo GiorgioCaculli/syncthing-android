@@ -10,6 +10,8 @@ import android.preference.PreferenceManager;
 import com.nutomic.syncthingandroid.service.Constants;
 import com.nutomic.syncthingandroid.service.SyncthingService;
 
+import java.util.Objects;
+
 public class BootReceiver extends BroadcastReceiver
 {
 
@@ -40,8 +42,8 @@ public class BootReceiver extends BroadcastReceiver
     @Override
     public void onReceive( Context context, Intent intent )
     {
-        if ( !intent.getAction().equals( Intent.ACTION_BOOT_COMPLETED ) &&
-                !intent.getAction().equals( Intent.ACTION_MY_PACKAGE_REPLACED ) )
+        if ( !Objects.equals( intent.getAction(), Intent.ACTION_BOOT_COMPLETED ) &&
+                !Objects.equals( intent.getAction(), Intent.ACTION_MY_PACKAGE_REPLACED ) )
         {
             return;
         }

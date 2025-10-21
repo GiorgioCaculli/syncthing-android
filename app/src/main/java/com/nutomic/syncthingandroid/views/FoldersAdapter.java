@@ -32,6 +32,7 @@ import com.nutomic.syncthingandroid.util.Util;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Generates item views for folder items.
@@ -56,28 +57,28 @@ public class FoldersAdapter extends ArrayAdapter< Folder >
      */
     private static String getLocalizedState( Context c, FolderStatus folderStatus )
     {
-        switch ( folderStatus.state )
+        return switch ( folderStatus.state )
         {
-            case "idle":
-                return c.getString( R.string.state_idle );
-            case "scanning":
-                return c.getString( R.string.state_scanning );
-            case "syncing":
+            case "idle" -> c.getString( R.string.state_idle );
+            case "scanning" -> c.getString( R.string.state_scanning );
+            case "syncing" ->
+            {
                 int percentage = ( folderStatus.globalBytes != 0 )
-                        ? Math.round( 100 * folderStatus.inSyncBytes / folderStatus.globalBytes )
+                        ? Math.round( ( float ) ( 100 * folderStatus.inSyncBytes ) / folderStatus.globalBytes )
                         : 100;
-                return c.getString( R.string.state_syncing, percentage );
-            case "error":
+                yield c.getString( R.string.state_syncing, percentage );
+            }
+            case "error" ->
+            {
                 if ( TextUtils.isEmpty( folderStatus.error ) )
                 {
-                    return c.getString( R.string.state_error );
+                    yield c.getString( R.string.state_error );
                 }
-                return c.getString( R.string.state_error ) + " (" + folderStatus.error + ")";
-            case "unknown":
-                return c.getString( R.string.state_unknown );
-            default:
-                return folderStatus.state;
-        }
+                yield c.getString( R.string.state_error ) + " (" + folderStatus.error + ")";
+            }
+            case "unknown" -> c.getString( R.string.state_unknown );
+            default -> folderStatus.state;
+        };
     }
 
     @Override
@@ -89,6 +90,8 @@ public class FoldersAdapter extends ArrayAdapter< Folder >
                 : DataBindingUtil.bind( convertView );
 
         Folder folder = getItem( position );
+        assert folder != null;
+        assert binding != null;
         binding.label.setText( TextUtils.isEmpty( folder.label ) ? folder.id : folder.label );
         binding.directory.setText( folder.path );
         binding.override.setOnClickListener( v ->
@@ -195,7 +198,7 @@ public class FoldersAdapter extends ArrayAdapter< Folder >
               i < getCount();
               i++ )
         {
-            api.getFolderStatus( getItem( i ).id, this::onReceiveFolderStatus );
+            api.getFolderStatus( Objects.requireNonNull( getItem( i ) ).id, this::onReceiveFolderStatus );
         }
     }
 

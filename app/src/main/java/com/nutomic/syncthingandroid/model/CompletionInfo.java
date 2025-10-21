@@ -9,9 +9,12 @@ package com.nutomic.syncthingandroid.model;
  */
 public class CompletionInfo
 {
+    /*
+    TODO: Figure out the point behind this class since only one variable is present... Why not Interface?
+     */
     public double completion = 100;
 
-    /**
+    /*
      * The following values are only returned by the REST API call
      * to ""/completion". We will need them in the future to show
      * more statistics in the device UI.

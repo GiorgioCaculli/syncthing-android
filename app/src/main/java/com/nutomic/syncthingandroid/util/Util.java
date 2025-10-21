@@ -74,7 +74,7 @@ public class Util
      * Converts a number of bytes to a human readable transfer rate in bytes per second
      * (eg 100 KiB/s).
      * <p>
-     * Based on http://stackoverflow.com/a/5599842
+     * Based on <a href="http://stackoverflow.com/a/5599842">StackOverflow - Format file size as MB, GB, etc [duplicate]</a>
      */
     public static String readableTransferRate( Context context, long bits )
     {
@@ -158,8 +158,8 @@ public class Util
     public static boolean nativeBinaryCanWriteToPath( Context context, String absoluteFolderPath )
     {
         final String TOUCH_FILE_NAME = ".stwritetest";
-        Boolean useRoot = false;
-        Boolean prefUseRoot = PreferenceManager.getDefaultSharedPreferences( context )
+        boolean useRoot = false;
+        boolean prefUseRoot = PreferenceManager.getDefaultSharedPreferences( context )
                 .getBoolean( Constants.PREF_USE_ROOT, false );
         if ( prefUseRoot && Shell.SU.available() )
         {
@@ -172,13 +172,13 @@ public class Util
         if ( exitCode != 0 )
         {
             String error;
-            switch ( exitCode )
+            if ( exitCode == 1 )
             {
-                case 1:
-                    error = "Permission denied";
-                    break;
-                default:
-                    error = "Shell execution failed";
+                error = "Permission denied";
+            }
+            else
+            {
+                error = "Shell execution failed";
             }
             Log.i( TAG, "Failed to write test file '" + touchFile +
                     "', " + error );

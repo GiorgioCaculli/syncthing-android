@@ -19,6 +19,8 @@ import com.nutomic.syncthingandroid.model.Device;
 import com.nutomic.syncthingandroid.service.RestApi;
 import com.nutomic.syncthingandroid.util.Util;
 
+import java.util.Objects;
+
 /**
  * Generates item views for device items.
  */
@@ -48,9 +50,9 @@ public class DevicesAdapter extends ArrayAdapter< Device >
         TextView download = convertView.findViewById( R.id.download );
         TextView upload = convertView.findViewById( R.id.upload );
 
-        String deviceId = getItem( position ).deviceID;
+        String deviceId = Objects.requireNonNull( getItem( position ) ).deviceID;
 
-        name.setText( getItem( position ).getDisplayName() );
+        name.setText( Objects.requireNonNull( getItem( position ) ).getDisplayName() );
         Resources r = getContext().getResources();
 
         Connections.Connection conn = null;

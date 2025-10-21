@@ -8,6 +8,7 @@ import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatEditText;
 
 /**
@@ -58,7 +59,7 @@ public class EnhancedEditText extends AppCompatEditText
     }
 
     @Override
-    public InputConnection onCreateInputConnection( EditorInfo outAttrs )
+    public InputConnection onCreateInputConnection( @NonNull EditorInfo outAttrs )
     {
         InputConnection conn = super.onCreateInputConnection( outAttrs );
         outAttrs.imeOptions &= ~IME_FLAG_NO_ENTER_ACTION;

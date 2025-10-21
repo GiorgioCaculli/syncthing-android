@@ -10,7 +10,6 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.nutomic.syncthingandroid.R;
 import com.nutomic.syncthingandroid.SyncthingApp;
@@ -79,19 +78,19 @@ public class SyncthingRunnable implements Runnable
         mUseRoot = mPreferences.getBoolean( Constants.PREF_USE_ROOT, false ) && Shell.SU.available();
         switch ( command )
         {
-            case deviceid:
+            case DEVICE_ID:
                 mCommand = new String[]{ mSyncthingBinary.getPath(), "-home", mContext.getFilesDir().toString(), "--device-id" };
                 break;
-            case generate:
+            case GENERATE:
                 mCommand = new String[]{ mSyncthingBinary.getPath(), "-generate", mContext.getFilesDir().toString(), "-logflags=0" };
                 break;
-            case main:
+            case MAIN:
                 mCommand = new String[]{ mSyncthingBinary.getPath(), "-home", mContext.getFilesDir().toString(), "-no-browser", "-logflags=0" };
                 break;
-            case resetdatabase:
+            case RESET_DATABASE:
                 mCommand = new String[]{ mSyncthingBinary.getPath(), "-home", mContext.getFilesDir().toString(), "-reset-database", "-logflags=0" };
                 break;
-            case resetdeltas:
+            case RESET_DELTAS:
                 mCommand = new String[]{ mSyncthingBinary.getPath(), "-home", mContext.getFilesDir().toString(), "-reset-deltas", "-logflags=0" };
                 break;
             default:
@@ -110,7 +109,7 @@ public class SyncthingRunnable implements Runnable
     {
         trimLogFile();
         int ret;
-        String capturedStdOut = "";
+        StringBuilder capturedStdOut = new StringBuilder();
         // Make sure Syncthing is executable
         try
         {
@@ -147,33 +146,24 @@ public class SyncthingRunnable implements Runnable
             Thread lWarn = null;
             if ( returnStdOut )
             {
-                BufferedReader br = null;
-                try
+                try ( BufferedReader br = new BufferedReader( new InputStreamReader( process.getInputStream(), StandardCharsets.UTF_8 ) ) )
                 {
-                    br = new BufferedReader( new InputStreamReader( process.getInputStream(), Charsets.UTF_8 ) );
                     String line;
                     while ( ( line = br.readLine() ) != null )
                     {
                         Log.println( Log.INFO, TAG_NATIVE, line );
-                        capturedStdOut = capturedStdOut + line + "\n";
+                        capturedStdOut.append( line ).append( "\n" );
                     }
                 }
                 catch ( IOException e )
                 {
                     Log.w( TAG, "Failed to read Syncthing's command line output", e );
                 }
-                finally
-                {
-                    if ( br != null )
-                    {
-                        br.close();
-                    }
-                }
             }
             else
             {
-                lInfo = log( process.getInputStream(), Log.INFO, true );
-                lWarn = log( process.getErrorStream(), Log.WARN, true );
+                lInfo = log( process.getInputStream(), Log.INFO );
+                lWarn = log( process.getErrorStream(), Log.WARN );
             }
 
             niceSyncthing();
@@ -226,7 +216,7 @@ public class SyncthingRunnable implements Runnable
                 process.destroy();
             }
         }
-        return capturedStdOut;
+        return capturedStdOut.toString();
     }
 
     private void putCustomEnvironmentVariables( Map< String, String > environment, SharedPreferences sp )
@@ -258,7 +248,7 @@ public class SyncthingRunnable implements Runnable
      */
     private List< String > getSyncthingPIDs()
     {
-        List< String > syncthingPIDs = new ArrayList< String >();
+        List< String > syncthingPIDs = new ArrayList<>();
         Process ps = null;
         DataOutputStream psOut = null;
         BufferedReader br = null;
@@ -405,41 +395,34 @@ public class SyncthingRunnable implements Runnable
      *
      * @param is       The stream to log.
      * @param priority The priority level.
-     * @param saveLog  True if the log should be stored to {@link #mLogFile}.
      */
-    private Thread log( final InputStream is, final int priority, final boolean saveLog )
+    private Thread log( final InputStream is, final int priority )
     {
         Thread t = new Thread( () ->
         {
             BufferedReader br = null;
             try
             {
-                br = new BufferedReader( new InputStreamReader( is, Charsets.UTF_8 ) );
+                br = new BufferedReader( new InputStreamReader( is, StandardCharsets.UTF_8 ) );
                 String line;
                 while ( ( line = br.readLine() ) != null )
                 {
                     Log.println( priority, TAG_NATIVE, line );
 
-                    if ( saveLog )
-                    {
-                        Files.append( line + "\n", mLogFile, Charsets.UTF_8 );
-                    }
+                    Files.append( line + "\n", mLogFile, StandardCharsets.UTF_8 );
                 }
             }
             catch ( IOException e )
             {
                 Log.w( TAG, "Failed to read Syncthing's command line output", e );
             }
-            if ( br != null )
+            try
             {
-                try
-                {
-                    br.close();
-                }
-                catch ( IOException e )
-                {
-                    Log.w( TAG, "log: Failed to close bufferedReader", e );
-                }
+                br.close();
+            }
+            catch ( IOException e )
+            {
+                Log.w( TAG, "log: Failed to close bufferedReader", e );
             }
         } );
         t.start();
@@ -515,13 +498,13 @@ public class SyncthingRunnable implements Runnable
         else
         {
             String socksProxyAddress = mPreferences.getString( Constants.PREF_SOCKS_PROXY_ADDRESS, "" );
-            if ( !socksProxyAddress.equals( "" ) )
+            if ( !socksProxyAddress.isEmpty() )
             {
                 targetEnv.put( "all_proxy", socksProxyAddress );
             }
 
             String httpProxyAddress = mPreferences.getString( Constants.PREF_HTTP_PROXY_ADDRESS, "" );
-            if ( !httpProxyAddress.equals( "" ) )
+            if ( !httpProxyAddress.isEmpty() )
             {
                 targetEnv.put( "http_proxy", httpProxyAddress );
                 targetEnv.put( "https_proxy", httpProxyAddress );
@@ -569,11 +552,11 @@ public class SyncthingRunnable implements Runnable
 
     public enum Command
     {
-        deviceid,           // Output the device ID to the command line.
-        generate,           // Generate keys, a config file and immediately exit.
-        main,               // Run the main Syncthing application.
-        resetdatabase,      // Reset Syncthing's database
-        resetdeltas,        // Reset Syncthing's delta indexes
+        DEVICE_ID,           // Output the device ID to the command line.
+        GENERATE,           // Generate keys, a config file and immediately exit.
+        MAIN,               // Run the main Syncthing application.
+        RESET_DATABASE,      // Reset Syncthing's database
+        RESET_DELTAS,        // Reset Syncthing's delta indexes
     }
 
     public interface OnSyncthingKilled

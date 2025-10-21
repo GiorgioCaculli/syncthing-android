@@ -11,6 +11,8 @@ import com.nutomic.syncthingandroid.service.Constants;
 import com.nutomic.syncthingandroid.service.NotificationHandler;
 import com.nutomic.syncthingandroid.service.SyncthingService;
 
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 /**
@@ -44,7 +46,7 @@ public class AppConfigReceiver extends BroadcastReceiver
     public void onReceive( Context context, Intent intent )
     {
         ( ( SyncthingApp ) context.getApplicationContext() ).component().inject( this );
-        switch ( intent.getAction() )
+        switch ( Objects.requireNonNull( intent.getAction() ) )
         {
             case ACTION_START:
                 BootReceiver.startServiceCompat( context );

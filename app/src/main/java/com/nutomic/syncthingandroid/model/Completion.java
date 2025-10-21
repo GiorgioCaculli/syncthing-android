@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * This class caches remote folder and device synchronization
@@ -46,7 +47,7 @@ public class Completion
 
         // Handle devices that were removed from the config.
         List< String > removedDevices = new ArrayList<>();
-        Boolean deviceFound;
+        boolean deviceFound;
         for ( String deviceId : deviceFolderMap.keySet() )
         {
             deviceFound = false;
@@ -75,13 +76,13 @@ public class Completion
             if ( !deviceFolderMap.containsKey( device.deviceID ) )
             {
                 Log.v( TAG, "updateFromConfig: Add device '" + device.deviceID + "' to cache model" );
-                deviceFolderMap.put( device.deviceID, new HashMap< String, CompletionInfo >() );
+                deviceFolderMap.put( device.deviceID, new HashMap<>() );
             }
         }
 
         // Handle folders that were removed from the config.
         List< String > removedFolders = new ArrayList<>();
-        Boolean folderFound;
+        boolean folderFound;
         for ( Map.Entry< String, HashMap< String, CompletionInfo > > device : deviceFolderMap.entrySet() )
         {
             for ( String folderId : device.getValue().keySet() )
@@ -116,6 +117,7 @@ public class Completion
                 {
                     // folder is shared with device.
                     folderMap = deviceFolderMap.get( device.deviceID );
+                    assert folderMap != null;
                     if ( !folderMap.containsKey( folder.id ) )
                     {
                         Log.v( TAG, "updateFromConfig: Add folder '" + folder.id +
@@ -163,9 +165,9 @@ public class Completion
         // Add device parent node if it does not exist.
         if ( !deviceFolderMap.containsKey( deviceId ) )
         {
-            deviceFolderMap.put( deviceId, new HashMap< String, CompletionInfo >() );
+            deviceFolderMap.put( deviceId, new HashMap<>() );
         }
         // Add folder or update existing folder entry.
-        deviceFolderMap.get( deviceId ).put( folderId, completionInfo );
+        Objects.requireNonNull( deviceFolderMap.get( deviceId ) ).put( folderId, completionInfo );
     }
 }

@@ -133,7 +133,7 @@ public class Constants
      */
     public static Boolean osSupportsTLS12()
     {
-        /**
+        /*
          * SSLProtocolException: SSL handshake failed on Android N/7.0,
          * missing support for elliptic curves.
          * See https://issuetracker.google.com/issues/37122132

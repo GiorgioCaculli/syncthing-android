@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Build;
 import android.text.TextUtils;
 
 import com.nutomic.syncthingandroid.R;
@@ -14,6 +15,7 @@ import com.nutomic.syncthingandroid.SyncthingApp;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -95,7 +97,10 @@ public final class Languages
         Map< String, String > tmpMap = new TreeMap<>();
         List< Locale > locales = Arrays.asList( LOCALES_TO_TEST );
         // Capitalize language names
-        Collections.sort( locales, ( l1, l2 ) -> l1.getDisplayLanguage().compareTo( l2.getDisplayLanguage() ) );
+        if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N )
+        {
+            Collections.sort( locales, Comparator.comparing( Locale::getDisplayLanguage ) );
+        }
         for ( Locale locale : locales )
         {
             String displayLanguage = locale.getDisplayLanguage( locale );

@@ -29,8 +29,6 @@ import java.util.TreeSet;
 public class SttracePreference extends MultiSelectListPreference
 {
 
-    private final String TAG = "SttracePreference";
-
     public SttracePreference( Context context, AttributeSet attrs )
     {
         super( context, attrs );
@@ -82,13 +80,11 @@ public class SttracePreference extends MultiSelectListPreference
         availableDebugFacilities = new HashSet<>( availableDebugFacilities );
         if ( !availableDebugFacilities.isEmpty() )
         {
-            for ( String facilityName : availableDebugFacilities )
-            {
-                retDebugFacilities.add( facilityName );
-            }
+            retDebugFacilities.addAll( availableDebugFacilities );
         }
         else
         {
+            String TAG = "StracePreference";
             Log.w( TAG, "getDebugFacilities: Failed to get facilities from prefs, falling back to hardcoded list." );
 
             // Syncthing v0.14.47 debug facilities.

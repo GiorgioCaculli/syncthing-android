@@ -68,23 +68,15 @@ public class RunConditionMonitor
      * Stores the result of the last call to {@link #decideShouldRun()}.
      */
     private RunConditionCheckResult lastRunConditionCheckResult;
-    private final SyncStatusObserver mSyncStatusObserver = new SyncStatusObserver()
-    {
-        @Override
-        public void onStatusChanged( int which )
-        {
-            updateShouldRunDecision();
-        }
-    };
 
-    public RunConditionMonitor( Context context, OnRunConditionChangedListener listener )
+    public RunConditionMonitor( Context context, @Nullable OnRunConditionChangedListener listener )
     {
         Log.v( TAG, "Created new instance" );
         ( ( SyncthingApp ) context.getApplicationContext() ).component().inject( this );
         mContext = context;
         mOnRunConditionChangedListener = listener;
 
-        /**
+        /*
          * Register broadcast receivers.
          */
         // NetworkReceiver
@@ -102,6 +94,7 @@ public class RunConditionMonitor
                 new IntentFilter( PowerManager.ACTION_POWER_SAVE_MODE_CHANGED ) );
 
         // SyncStatusObserver to monitor android's "AutoSync" quick toggle.
+        SyncStatusObserver mSyncStatusObserver = which -> updateShouldRunDecision();
         mSyncStatusObserverHandle = ContentResolver.addStatusChangeListener(
                 ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, mSyncStatusObserver );
 
@@ -262,7 +255,7 @@ public class RunConditionMonitor
             }
         }
 
-        /**
+        /*
          * If none of the above run conditions matched, don't run.
          */
         Log.v( TAG, "decideShouldRun: return false" );
@@ -280,13 +273,9 @@ public class RunConditionMonitor
             {
                 blockerReasons.add( NO_MOBILE_CONNECTION );
             }
-            else if ( prefRunOnWifi )
-            {
-                blockerReasons.add( NO_WIFI_CONNECTION );
-            }
             else
             {
-                blockerReasons.add( NO_NETWORK_OR_FLIGHTMODE );
+                blockerReasons.add( NO_WIFI_CONNECTION );
             }
         }
         return new RunConditionCheckResult( blockerReasons );
@@ -318,6 +307,7 @@ public class RunConditionMonitor
     private boolean isCharging()
     {
         Intent intent = mContext.registerReceiver( null, new IntentFilter( Intent.ACTION_BATTERY_CHANGED ) );
+        assert intent != null;
         int plugged = intent.getIntExtra( BatteryManager.EXTRA_PLUGGED, -1 );
         return plugged == BatteryManager.BATTERY_PLUGGED_AC ||
                 plugged == BatteryManager.BATTERY_PLUGGED_USB ||
@@ -373,16 +363,14 @@ public class RunConditionMonitor
             // No network connection.
             return false;
         }
-        switch ( ni.getType() )
+        return switch ( ni.getType() )
         {
-            case ConnectivityManager.TYPE_BLUETOOTH:
-            case ConnectivityManager.TYPE_MOBILE:
-            case ConnectivityManager.TYPE_MOBILE_DUN:
-            case ConnectivityManager.TYPE_MOBILE_HIPRI:
-                return true;
-            default:
-                return false;
-        }
+            case ConnectivityManager.TYPE_BLUETOOTH,
+                 ConnectivityManager.TYPE_MOBILE,
+                 ConnectivityManager.TYPE_MOBILE_DUN,
+                 ConnectivityManager.TYPE_MOBILE_HIPRI -> true;
+            default -> false;
+        };
     }
 
     private boolean isWifiOrEthernetConnection()
@@ -399,15 +387,13 @@ public class RunConditionMonitor
             // No network connection.
             return false;
         }
-        switch ( ni.getType() )
+        return switch ( ni.getType() )
         {
-            case ConnectivityManager.TYPE_WIFI:
-            case ConnectivityManager.TYPE_WIMAX:
-            case ConnectivityManager.TYPE_ETHERNET:
-                return true;
-            default:
-                return false;
-        }
+            case ConnectivityManager.TYPE_WIFI,
+                 ConnectivityManager.TYPE_WIMAX,
+                 ConnectivityManager.TYPE_ETHERNET -> true;
+            default -> false;
+        };
     }
 
     private boolean isWifiConnectionWhitelisted( Set< String > whitelistedSsids )
@@ -444,14 +430,7 @@ public class RunConditionMonitor
                     || Intent.ACTION_POWER_DISCONNECTED.equals( intent.getAction() ) )
             {
                 Handler handler = new Handler();
-                handler.postDelayed( new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        updateShouldRunDecision();
-                    }
-                }, 5000 );
+                handler.postDelayed( RunConditionMonitor.this::updateShouldRunDecision, 5000 );
             }
         }
     }

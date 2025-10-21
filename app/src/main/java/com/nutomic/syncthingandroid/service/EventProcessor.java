@@ -29,6 +29,7 @@ import com.nutomic.syncthingandroid.model.Folder;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -115,7 +116,7 @@ public class EventProcessor implements Runnable, RestApi.OnReceiveEventListener
         {
             mapData = ( Map< String, Object > ) event.data;
         }
-        catch ( ClassCastException e )
+        catch ( ClassCastException ignored )
         {
         }
         switch ( event.type )
@@ -152,7 +153,7 @@ public class EventProcessor implements Runnable, RestApi.OnReceiveEventListener
                         folderPath = f.path;
                     }
                 }
-                File updatedFile = new File( folderPath, ( String ) mapData.get( "item" ) );
+                File updatedFile = new File( folderPath, ( String ) Objects.requireNonNull( mapData.get( "item" ) ) );
                 if ( !"delete".equals( mapData.get( "action" ) ) )
                 {
                     Log.i( TAG, "Rescanned file via MediaScanner: " + updatedFile );
@@ -266,6 +267,7 @@ public class EventProcessor implements Runnable, RestApi.OnReceiveEventListener
         }
         Log.d( TAG, "Unknown device " + deviceName + "(" + deviceId + ") wants to connect" );
 
+        assert deviceName != null;
         String title = mContext.getString( R.string.device_rejected,
                 deviceName.isEmpty() ? deviceId.substring( 0, 7 ) : deviceName );
         int notificationId = mNotificationHandler.getNotificationIdFromText( title );
@@ -315,6 +317,7 @@ public class EventProcessor implements Runnable, RestApi.OnReceiveEventListener
                 break;
             }
         }
+        assert folderLabel != null;
         String title = mContext.getString( R.string.folder_rejected, deviceName,
                 folderLabel.isEmpty() ? folderId : folderLabel + " (" + folderId + ")" );
         int notificationId = mNotificationHandler.getNotificationIdFromText( title );

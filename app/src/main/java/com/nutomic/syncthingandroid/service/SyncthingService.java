@@ -218,7 +218,7 @@ public class SyncthingService extends Service
         {
             shutdown( State.INIT, () ->
             {
-                new SyncthingRunnable( this, SyncthingRunnable.Command.resetdatabase ).run();
+                new SyncthingRunnable( this, SyncthingRunnable.Command.RESET_DATABASE ).run();
                 launchStartupTask();
             } );
         }
@@ -226,7 +226,7 @@ public class SyncthingService extends Service
         {
             shutdown( State.INIT, () ->
             {
-                new SyncthingRunnable( this, SyncthingRunnable.Command.resetdeltas ).run();
+                new SyncthingRunnable( this, SyncthingRunnable.Command.RESET_DELTAS ).run();
                 launchStartupTask();
             } );
         }
@@ -360,7 +360,7 @@ public class SyncthingService extends Service
             Log.e( TAG, "onStartupTaskCompleteListener: Syncthing binary lifecycle violated" );
             return;
         }
-        mSyncthingRunnable = new SyncthingRunnable( this, SyncthingRunnable.Command.main );
+        mSyncthingRunnable = new SyncthingRunnable( this, SyncthingRunnable.Command.MAIN );
         mSyncthingRunnableThread = new Thread( mSyncthingRunnable );
         mSyncthingRunnableThread.start();
 

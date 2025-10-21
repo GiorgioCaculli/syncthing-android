@@ -2,70 +2,70 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ListPreference
-        android:key="theme"
-        android:title="@string/preference_theme_title"
+        android:defaultValue="-1"
         android:entries="@array/theme_names"
         android:entryValues="@array/theme_values"
-        android:defaultValue="-1"/> <!-- -1 is Follow System -->
+        android:key="theme"
+        android:title="@string/preference_theme_title" /> <!-- -1 is Follow System -->
 
     <PreferenceScreen
-        android:title="@string/category_run_conditions"
-        android:key="category_run_conditions">
+        android:key="category_run_conditions"
+        android:title="@string/category_run_conditions">
 
         <CheckBoxPreference
+            android:defaultValue="true"
             android:key="static_run_conditions"
-            android:title="@string/run_conditions_title"
             android:summary="@string/run_conditions_summary"
-            android:defaultValue="true" />
+            android:title="@string/run_conditions_title" />
 
         <CheckBoxPreference
+            android:defaultValue="true"
             android:key="run_on_wifi"
-            android:title="@string/run_on_wifi_title"
             android:summary="@string/run_on_wifi_summary"
-            android:defaultValue="true" />
+            android:title="@string/run_on_wifi_title" />
 
         <CheckBoxPreference
+            android:defaultValue="false"
             android:key="run_on_metered_wifi"
-            android:title="@string/run_on_metered_wifi_title"
             android:summary="@string/run_on_metered_wifi_summary"
-            android:defaultValue="false" />
+            android:title="@string/run_on_metered_wifi_title" />
 
         <com.nutomic.syncthingandroid.views.WifiSsidPreference
             android:key="wifi_ssid_whitelist"
-            android:title="@string/run_on_whitelisted_wifi_title"
-            android:summary="@null" />
+            android:summary="@null"
+            android:title="@string/run_on_whitelisted_wifi_title" />
 
         <CheckBoxPreference
+            android:defaultValue="false"
             android:key="run_on_mobile_data"
-            android:title="@string/run_on_mobile_data_title"
             android:summary="@string/run_on_mobile_data_summary"
-            android:defaultValue="false" />
+            android:title="@string/run_on_mobile_data_title" />
 
         <ListPreference
-            android:key="power_source"
-            android:title="@string/power_source_title"
-            android:entryValues="@array/power_source_values"
+            android:defaultValue="ac_and_battery_power"
             android:entries="@array/power_source_entries"
+            android:entryValues="@array/power_source_values"
+            android:key="power_source"
             android:summary="@null"
-            android:defaultValue="ac_and_battery_power" />
+            android:title="@string/power_source_title" />
 
         <CheckBoxPreference
+            android:defaultValue="true"
             android:key="respect_battery_saving"
-            android:title="@string/respect_battery_saving_title"
             android:summary="@string/respect_battery_saving_summary"
-            android:defaultValue="true" />
+            android:title="@string/respect_battery_saving_title" />
 
         <CheckBoxPreference
+            android:defaultValue="false"
             android:key="respect_master_sync"
-            android:title="@string/respect_master_sync_title"
             android:summary="@string/respect_master_sync_summary"
-            android:defaultValue="false" />
+            android:title="@string/respect_master_sync_title" />
 
         <CheckBoxPreference
+            android:defaultValue="false"
             android:key="run_in_flight_mode"
-            android:title="@string/run_in_flight_mode_title"
             android:summary="@string/run_in_flight_mode_summary"
-            android:defaultValue="false" />
+            android:title="@string/run_in_flight_mode_title" />
 
     </PreferenceScreen>
 
@@ -74,33 +74,33 @@
         android:title="@string/category_behaviour">
 
         <CheckBoxPreference
+            android:defaultValue="false"
             android:key="advanced_folder_picker"
-            android:title="@string/advanced_folder_picker"
             android:summary="@string/advanced_folder_picker_summary"
-            android:defaultValue="false" />
+            android:title="@string/advanced_folder_picker" />
 
         <ListPreference
             android:key="pref_current_language"
-            android:title="@string/preference_language_title"
-            android:summary="@string/preference_language_summary" />
+            android:summary="@string/preference_language_summary"
+            android:title="@string/preference_language_title" />
 
         <CheckBoxPreference
+            android:defaultValue="false"
             android:key="start_into_web_gui"
-            android:title="@string/start_into_web_gui_title"
             android:summary="@string/start_into_web_gui_summary"
-            android:defaultValue="false"/>
+            android:title="@string/start_into_web_gui_title" />
 
         <Preference
             android:key="static_service_settings"
             android:persistent="false"
             android:selectable="false"
-            android:title="@string/service_settings_title"
-            android:summary="@string/service_settings_summary"/>
+            android:summary="@string/service_settings_summary"
+            android:title="@string/service_settings_title" />
 
         <CheckBoxPreference
+            android:defaultValue="false"
             android:key="always_run_in_background"
-            android:title="@string/run_as_background_service"
-            android:defaultValue="false" />
+            android:title="@string/run_as_background_service" />
 
     </PreferenceScreen>
 
@@ -109,72 +109,72 @@
         android:title="@string/category_syncthing_options">
 
         <EditTextPreference
+            android:inputType="textCapWords"
             android:key="deviceName"
-            android:title="@string/device_name"
             android:persistent="false"
-            android:inputType="textCapWords" />
+            android:title="@string/device_name" />
 
         <EditTextPreference
+            android:inputType="textNoSuggestions"
             android:key="listenAddresses"
-            android:title="@string/listen_address"
             android:persistent="false"
-            android:inputType="textNoSuggestions" />
+            android:title="@string/listen_address" />
 
         <EditTextPreference
+            android:inputType="number"
             android:key="maxRecvKbps"
-            android:title="@string/max_recv_kbps"
             android:numeric="integer"
             android:persistent="false"
-            android:inputType="number" />
+            android:title="@string/max_recv_kbps" />
 
         <EditTextPreference
+            android:inputType="number"
             android:key="maxSendKbps"
-            android:title="@string/max_send_kbps"
             android:numeric="integer"
             android:persistent="false"
-            android:inputType="number" />
+            android:title="@string/max_send_kbps" />
 
         <CheckBoxPreference
             android:key="natEnabled"
-            android:title="@string/enable_nat_traversal"
-            android:persistent="false"/>
+            android:persistent="false"
+            android:title="@string/enable_nat_traversal" />
 
         <CheckBoxPreference
             android:key="localAnnounceEnabled"
-            android:title="@string/local_announce_enabled"
-            android:persistent="false" />
+            android:persistent="false"
+            android:title="@string/local_announce_enabled" />
 
         <CheckBoxPreference
             android:key="globalAnnounceEnabled"
-            android:title="@string/global_announce_enabled"
-            android:persistent="false" />
+            android:persistent="false"
+            android:title="@string/global_announce_enabled" />
 
         <CheckBoxPreference
             android:key="relaysEnabled"
-            android:title="@string/enable_relaying"
-            android:persistent="false" />
+            android:persistent="false"
+            android:title="@string/enable_relaying" />
 
         <EditTextPreference
+            android:inputType="textNoSuggestions"
             android:key="globalAnnounceServers"
-            android:title="@string/global_announce_server"
             android:persistent="false"
-            android:inputType="textNoSuggestions" />
+            android:title="@string/global_announce_server" />
 
         <EditTextPreference
+            android:inputType="textNoSuggestions"
             android:key="address"
-            android:title="@string/gui_address"
             android:persistent="false"
-            android:inputType="textNoSuggestions" />
+            android:title="@string/gui_address" />
 
         <CheckBoxPreference
             android:key="urAccepted"
-            android:title="@string/usage_reporting"
-            android:persistent="false" />
+            android:persistent="false"
+            android:title="@string/usage_reporting" />
 
         <Preference
             android:key="undo_ignored_devices_folders"
-            android:title="@string/undo_ignored_devices_folders_title"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:title="@string/undo_ignored_devices_folders_title" />
 
     </PreferenceScreen>
 
@@ -192,113 +192,110 @@
 
     </PreferenceScreen>
 
-    <PreferenceScreen
-        android:title="@string/category_debug">
+    <PreferenceScreen android:title="@string/category_debug">
 
         <Preference
-            android:title="@string/open_log"
-            android:summary="@string/open_log_summary">
-            <intent
-                android:action=".activities.LogActivity" />
+            android:summary="@string/open_log_summary"
+            android:title="@string/open_log">
+            <intent android:action=".activities.LogActivity" />
         </Preference>
 
         <CheckBoxPreference
             android:key="notify_crashes"
-            android:title="@string/notify_crashes_title"
-            android:summary="@string/notify_crashes_summary"/>
+            android:summary="@string/notify_crashes_summary"
+            android:title="@string/notify_crashes_title" />
 
         <com.nutomic.syncthingandroid.views.SttracePreference
             android:key="debug_facilities_enabled"
             android:title="@string/sttrace_title" />
 
         <EditTextPreference
+            android:inputType="textNoSuggestions"
             android:key="environment_variables"
-            android:title="@string/environment_variables"
             android:singleLine="true"
-            android:inputType="textNoSuggestions"/>
+            android:title="@string/environment_variables" />
 
         <Preference
             android:key="st_reset_database"
-            android:title="@string/st_reset_database_title"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:title="@string/st_reset_database_title" />
 
         <Preference
             android:key="st_reset_deltas"
-            android:title="@string/st_reset_deltas_title"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:title="@string/st_reset_deltas_title" />
 
     </PreferenceScreen>
 
     <PreferenceScreen
-        android:title="@string/category_experimental"
-        android:key="category_experimental">
+        android:key="category_experimental"
+        android:title="@string/category_experimental">
 
         <CheckBoxPreference
+            android:defaultValue="false"
             android:key="use_root"
-            android:title="@string/use_root_title"
             android:summary="@string/use_root_summary"
-            android:defaultValue="false" />
+            android:title="@string/use_root_title" />
 
         <CheckBoxPreference
+            android:defaultValue="false"
             android:key="wakelock_while_binary_running"
-            android:title="@string/keep_wakelock_while_binary_running"
             android:summary="@string/keep_wakelock_while_binary_running_summary"
-            android:defaultValue="false" />
+            android:title="@string/keep_wakelock_while_binary_running" />
 
         <CheckBoxPreference
             android:key="use_tor"
-            android:title="@string/use_tor_title"
-            android:summary="@string/use_tor_summary" />
+            android:summary="@string/use_tor_summary"
+            android:title="@string/use_tor_title" />
 
         <EditTextPreference
+            android:inputType="textUri|textNoSuggestions"
             android:key="socks_proxy_address"
-            android:title="@string/socks_proxy_address_title"
             android:summary=""
-            android:inputType="textUri|textNoSuggestions" />
+            android:title="@string/socks_proxy_address_title" />
 
         <EditTextPreference
+            android:inputType="textUri|textNoSuggestions"
             android:key="http_proxy_address"
-            android:title="@string/http_proxy_address_title"
             android:summary=""
-            android:inputType="textUri|textNoSuggestions" />
+            android:title="@string/http_proxy_address_title" />
 
         <CheckBoxPreference
             android:key="use_legacy_hashing"
-            android:title="@string/use_legacy_hashing_title"
-            android:summary="@string/use_legacy_hashing_summary" />
+            android:summary="@string/use_legacy_hashing_summary"
+            android:title="@string/use_legacy_hashing_title" />
 
     </PreferenceScreen>
 
-    <PreferenceScreen
-        android:title="@string/category_about">
+    <PreferenceScreen android:title="@string/category_about">
 
         <Preference
-            android:title="@string/syncthing_forum_title"
-            android:summary="@string/syncthing_forum_summary">
+            android:summary="@string/syncthing_forum_summary"
+            android:title="@string/syncthing_forum_title">
             <intent
                 android:action="android.intent.action.VIEW"
                 android:data="@string/syncthing_forum_url" />
         </Preference>
 
         <Preference
-            android:title="@string/report_issue_title"
-            android:summary="@string/report_issue_summary">
+            android:summary="@string/report_issue_summary"
+            android:title="@string/report_issue_title">
             <intent
                 android:action="android.intent.action.VIEW"
                 android:data="@string/issue_tracker_url" />
         </Preference>
 
         <Preference
-            android:title="@string/donate_title"
-            android:summary="@string/donate_summary">
+            android:summary="@string/donate_summary"
+            android:title="@string/donate_title">
             <intent
                 android:action="android.intent.action.VIEW"
                 android:data="@string/donate_url" />
         </Preference>
 
         <Preference
-            android:title="@string/privacy_title"
-            android:summary="@string/privacy_summary">
+            android:summary="@string/privacy_summary"
+            android:title="@string/privacy_title">
             <intent
                 android:action="android.intent.action.VIEW"
                 android:data="@string/privacy_policy_url" />

@@ -80,7 +80,7 @@ public class WifiSsidPreference extends MultiSelectListPreference
             {
                 String ssid = info.getSSID();
                 // api lvl 30 will have WifiManager.UNKNOWN_SSID
-                if ( ssid != null && ssid != "" && !ssid.contains( "unknown ssid" ) )
+                if ( ssid != null && !ssid.isEmpty() && !ssid.contains( "unknown ssid" ) )
                 {
                     if ( !selected.contains( ssid ) )
                     {
@@ -104,7 +104,7 @@ public class WifiSsidPreference extends MultiSelectListPreference
             }
         }
 
-        if ( all.size() > 0 )
+        if ( !all.isEmpty() )
         {
             setEntries( stripQuotes( all ) ); // display without surrounding quotes
             setEntryValues( all.toArray( new CharSequence[ all.size() ] ) ); // the value of the entry is the SSID "as is"
@@ -112,9 +112,8 @@ public class WifiSsidPreference extends MultiSelectListPreference
             super.showDialog( state );
         }
 
-        if ( !hasPerms && context instanceof Activity )
+        if ( !hasPerms && context instanceof Activity activity )
         {
-            Activity activity = ( Activity ) context;
             ActivityCompat.requestPermissions( activity, PermissionUtil.getLocationPermissions(), Constants.PermissionRequestType.LOCATION.ordinal() );
         }
     }
@@ -125,11 +124,9 @@ public class WifiSsidPreference extends MultiSelectListPreference
     private boolean hasLocationPermissions()
     {
         String[] perms = PermissionUtil.getLocationPermissions();
-        for ( int i = 0;
-              i < perms.length;
-              i++ )
+        for ( String perm : perms )
         {
-            if ( ContextCompat.checkSelfPermission( getContext(), perms[ i ] ) != PackageManager.PERMISSION_GRANTED )
+            if ( ContextCompat.checkSelfPermission( getContext(), perm ) != PackageManager.PERMISSION_GRANTED )
             {
                 return false;
             }

@@ -2,6 +2,8 @@ package com.nutomic.syncthingandroid.model;
 
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+
 import com.nutomic.syncthingandroid.service.Constants;
 
 import java.io.Serializable;
@@ -75,6 +77,7 @@ public class Folder
         }
     }
 
+    @NonNull
     @Override
     public String toString()
     {

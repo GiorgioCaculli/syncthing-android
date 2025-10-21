@@ -59,7 +59,7 @@ public class ConfigXml
         if ( isFirstStart )
         {
             Log.i( TAG, "App started for the first time. Generating keys and config." );
-            new SyncthingRunnable( context, SyncthingRunnable.Command.generate ).run();
+            new SyncthingRunnable( context, SyncthingRunnable.Command.GENERATE ).run();
         }
 
         readConfig();
@@ -69,12 +69,12 @@ public class ConfigXml
             boolean changed = false;
 
             Log.i( TAG, "Starting syncthing to retrieve local device id." );
-            String logOutput = new SyncthingRunnable( context, SyncthingRunnable.Command.deviceid ).run( true );
+            String logOutput = new SyncthingRunnable( context, SyncthingRunnable.Command.DEVICE_ID ).run( true );
             String localDeviceID = logOutput.replace( "\n", "" );
             // Verify local device ID is correctly formatted.
             if ( localDeviceID.matches( "^([A-Z0-9]{7}-){7}[A-Z0-9]{7}$" ) )
             {
-                changed = changeLocalDeviceName( localDeviceID ) || changed;
+                changed = changeLocalDeviceName( localDeviceID );
             }
             changed = changeDefaultFolder() || changed;
 
@@ -140,10 +140,10 @@ public class ConfigXml
     @SuppressWarnings( "SdCardPath" )
     public void updateIfNeeded()
     {
-        boolean changed = false;
+        boolean changed;
 
         /* Perform one-time migration tasks on syncthing's config file when coming from an older config version. */
-        changed = migrateSyncthingOptions() || changed;
+        changed = migrateSyncthingOptions();
 
         /* Get refs to important config objects */
         NodeList folders = mConfig.getDocumentElement().getElementsByTagName( "folder" );
@@ -276,7 +276,7 @@ public class ConfigXml
                 r.setAttribute( "fsWatcherDelayS", "10" );
             }
 
-            /**
+            /*
              * Set config version to 28 after manual config migration
              * This prevents "unackedNotificationID" getting populated
              * with the fsWatcher GUI notification.
@@ -358,7 +358,7 @@ public class ConfigXml
                 .replace( " ", "_" )
                 .toLowerCase( Locale.US )
                 .replaceAll( "[^a-z0-9_-]", "" );
-        String defaultFolderId = deviceModel + "_" + generateRandomString( FOLDER_ID_APPENDIX_LENGTH );
+        String defaultFolderId = deviceModel + "_" + generateRandomString();
         folder.setAttribute( "label", mContext.getString( R.string.default_folder_label ) );
         folder.setAttribute( "id", mContext.getString( R.string.default_folder_id, defaultFolderId ) );
         folder.setAttribute( "path", Environment
@@ -372,13 +372,13 @@ public class ConfigXml
     /**
      * Generates a random String with a given length
      */
-    private String generateRandomString( int length )
+    private String generateRandomString()
     {
         char[] chars = "abcdefghjkmnpqrstuvwxyz123456789".toCharArray();
         Random random = new Random();
         StringBuilder sb = new StringBuilder();
         for ( int i = 0;
-              i < length;
+              i < ConfigXml.FOLDER_ID_APPENDIX_LENGTH;
               ++i )
         {
             sb.append( chars[ random.nextInt( chars.length ) ] );

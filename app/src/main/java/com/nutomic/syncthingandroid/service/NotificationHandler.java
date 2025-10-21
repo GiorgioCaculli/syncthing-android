@@ -115,7 +115,7 @@ public class NotificationHandler
         {
             if ( Build.VERSION.SDK_INT < Build.VERSION_CODES.O )
             {
-                /**
+                /*
                  * Android 7 and lower:
                  * The app may run in background and monitor run conditions even if it is not
                  * running as a foreground service. For that reason, we can use a normal
@@ -125,7 +125,7 @@ public class NotificationHandler
             }
             else
             {
-                /**
+                /*
                  * Android 8+:
                  * Always use startForeground.
                  * This makes sure the app is not killed, and we don't miss run condition events.
@@ -168,7 +168,7 @@ public class NotificationHandler
                 break;
         }
 
-        /**
+        /*
          * Reason for two separate IDs: if one of the notification channels is hidden then
          * the startForeground() below won't update the notification but use the old one.
          */
@@ -262,7 +262,7 @@ public class NotificationHandler
                                          PendingIntent piAccept,
                                          PendingIntent piIgnore )
     {
-        /**
+        /*
          * As we know the id for a specific notification text,
          * we'll dismiss this notification as it may be outdated.
          * This is also valid if the notification does not exist.

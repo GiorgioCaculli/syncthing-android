@@ -7,6 +7,7 @@ import android.os.storage.StorageManager;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.File;
@@ -70,7 +71,7 @@ public class FileUtils
         {
             documentPath = documentPath.substring( 0, documentPath.length() - 1 );
         }
-        if ( documentPath.length() > 0 )
+        if ( !documentPath.isEmpty() )
         {
             if ( documentPath.startsWith( File.separator ) )
             {
@@ -112,6 +113,7 @@ public class FileUtils
             Method isPrimary = storageVolumeClazz.getMethod( "isPrimary" );
             Object result = getVolumeList.invoke( mStorageManager );
 
+            assert result != null;
             final int length = Array.getLength( result );
             for ( int i = 0;
                   i < length;
@@ -120,7 +122,7 @@ public class FileUtils
                 Object storageVolumeElement = Array.get( result, i );
                 String uuid = ( String ) getUuid.invoke( storageVolumeElement );
                 Boolean primary = ( Boolean ) isPrimary.invoke( storageVolumeElement );
-                Boolean isPrimaryVolume = ( primary && PRIMARY_VOLUME_NAME.equals( volumeId ) );
+                Boolean isPrimaryVolume = ( Boolean.TRUE.equals( primary ) && PRIMARY_VOLUME_NAME.equals( volumeId ) );
                 Boolean isExternalVolume = ( ( uuid != null ) && uuid.equals( volumeId ) );
                 Log.d( TAG, "Found volume with uuid='" + uuid +
                         "', volumeId='" + volumeId +
@@ -151,6 +153,7 @@ public class FileUtils
             // >= API level 30
             Method getDir = storageVolumeClazz.getMethod( "getDirectory" );
             File file = ( File ) getDir.invoke( storageVolumeElement );
+            assert file != null;
             return file.getPath();
         }
         catch ( NoSuchMethodException e )
@@ -173,14 +176,13 @@ public class FileUtils
     {
         try
         {
-            /**
+            /*
              * Determine the app's private data folder on external storage if present.
              * e.g. "/storage/abcd-efgh/Android/com.nutomic.syncthinandroid/files"
              */
-            ArrayList< File > externalFilesDir = new ArrayList<>();
-            externalFilesDir.addAll( Arrays.asList( context.getExternalFilesDirs( null ) ) );
+            ArrayList< File > externalFilesDir = new ArrayList<>( Arrays.asList( context.getExternalFilesDirs( null ) ) );
             externalFilesDir.remove( context.getExternalFilesDir( null ) );
-            if ( externalFilesDir.size() == 0 )
+            if ( externalFilesDir.isEmpty() )
             {
                 Log.w( TAG, "Could not determine app's private files directory on external storage." );
                 return null;
@@ -235,7 +237,7 @@ public class FileUtils
         }
     }
 
-    @Nullable
+    @NonNull
     public static String cutTrailingSlash( final String path )
     {
         if ( path.endsWith( File.separator ) )

@@ -206,7 +206,7 @@ public class RestApi
 
     private void onReloadConfigComplete( String result )
     {
-        Boolean configParseSuccess;
+        boolean configParseSuccess;
         synchronized ( mConfigLock )
         {
             mConfig = new Gson().fromJson( result, Config.class );
@@ -242,13 +242,9 @@ public class RestApi
             {
                 try
                 {
-                    Set< String > facilitiesToStore = new HashSet< String >();
                     JsonObject json = new JsonParser().parse( result ).getAsJsonObject();
                     JsonObject jsonFacilities = json.getAsJsonObject( "facilities" );
-                    for ( String facilityName : jsonFacilities.keySet() )
-                    {
-                        facilitiesToStore.add( facilityName );
-                    }
+                    Set< String > facilitiesToStore = new HashSet<>( jsonFacilities.keySet() );
                     PreferenceManager.getDefaultSharedPreferences( mContext ).edit()
                             .putStringSet( Constants.PREF_DEBUG_FACILITIES_AVAILABLE, facilitiesToStore )
                             .apply();
@@ -311,7 +307,7 @@ public class RestApi
             {
                 if ( deviceId.equals( device.deviceID ) )
                 {
-                    /**
+                    /*
                      * Check if the folder has already been ignored.
                      */
                     for ( IgnoredFolder ignoredFolder : device.ignoredFolders )
@@ -324,7 +320,7 @@ public class RestApi
                         }
                     }
 
-                    /**
+                    /*
                      * Ignore folder by moving its corresponding "pendingFolder" entry to
                      * a newly created "ignoredFolder" entry.
                      */
@@ -658,8 +654,8 @@ public class RestApi
     {
         new GetRequest( mContext, mUrl, GetRequest.URI_CONNECTIONS, mApiKey, null, result ->
         {
-            Long now = System.currentTimeMillis();
-            Long msElapsed = now - mPreviousConnectionTime;
+            long now = System.currentTimeMillis();
+            long msElapsed = now - mPreviousConnectionTime;
             if ( msElapsed < Constants.GUI_UPDATE_INTERVAL )
             {
                 listener.onResult( deepCopy( mPreviousConnections.get(), Connections.class ) );
@@ -676,6 +672,7 @@ public class RestApi
                         ( mPreviousConnections.isPresent() && mPreviousConnections.get().connections.containsKey( e.getKey() ) )
                                 ? mPreviousConnections.get().connections.get( e.getKey() )
                                 : new Connections.Connection();
+                assert prev != null;
                 e.getValue().setTransferRate( prev, msElapsed );
             }
             Connections.Connection prev =
