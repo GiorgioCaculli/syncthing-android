@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.ListFragment;
 
 import com.nutomic.syncthingandroid.R;
@@ -23,6 +24,7 @@ import com.nutomic.syncthingandroid.views.DevicesAdapter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -75,7 +77,7 @@ public class DeviceListFragment extends ListFragment implements SyncthingService
     }
 
     @Override
-    public void onViewCreated( View view, Bundle savedInstanceState )
+    public void onViewCreated( @NonNull View view, Bundle savedInstanceState )
     {
         super.onViewCreated( view, savedInstanceState );
 
@@ -127,12 +129,12 @@ public class DeviceListFragment extends ListFragment implements SyncthingService
     {
         Intent intent = new Intent( getActivity(), DeviceActivity.class );
         intent.putExtra( DeviceActivity.EXTRA_IS_CREATE, false );
-        intent.putExtra( DeviceActivity.EXTRA_DEVICE_ID, mAdapter.getItem( i ).deviceID );
+        intent.putExtra( DeviceActivity.EXTRA_DEVICE_ID, Objects.requireNonNull( mAdapter.getItem( i ) ).deviceID );
         startActivity( intent );
     }
 
     @Override
-    public void onCreateOptionsMenu( Menu menu, MenuInflater inflater )
+    public void onCreateOptionsMenu( @NonNull Menu menu, MenuInflater inflater )
     {
         inflater.inflate( R.menu.device_list, menu );
     }

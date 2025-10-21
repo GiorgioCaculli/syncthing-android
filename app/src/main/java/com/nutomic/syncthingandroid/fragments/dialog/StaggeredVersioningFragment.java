@@ -15,6 +15,7 @@ import com.nutomic.syncthingandroid.R;
 import com.nutomic.syncthingandroid.activities.FolderPickerActivity;
 import com.nutomic.syncthingandroid.fragments.NumberPickerFragment;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 
@@ -62,8 +63,9 @@ public class StaggeredVersioningFragment extends Fragment
     private void updateNumberPicker()
     {
         NumberPickerFragment numberPicker = ( NumberPickerFragment ) getChildFragmentManager().findFragmentByTag( "numberpicker_staggered_versioning" );
+        assert numberPicker != null;
         numberPicker.updateNumberPicker( 100, 0, getMaxAgeInDays() );
-        numberPicker.setOnValueChangedLisenter( ( picker, oldVal, newVal ) -> updatePreference( "maxAge", ( String.valueOf( TimeUnit.DAYS.toSeconds( newVal ) ) ) ) );
+        numberPicker.setOnValueChangedListener( ( picker, oldVal, newVal ) -> updatePreference( "maxAge", ( String.valueOf( TimeUnit.DAYS.toSeconds( newVal ) ) ) ) );
     }
 
     private void initiateVersionsPathTextView()
@@ -99,11 +101,12 @@ public class StaggeredVersioningFragment extends Fragment
 
     private void updatePreference( String key, String newValue )
     {
+        assert getArguments() != null;
         getArguments().putString( key, newValue );
     }
 
     private int getMaxAgeInDays()
     {
-        return ( int ) TimeUnit.SECONDS.toDays( Long.valueOf( mArguments.getString( "maxAge" ) ) );
+        return ( int ) TimeUnit.SECONDS.toDays( Long.parseLong( Objects.requireNonNull( mArguments.getString( "maxAge" ) ) ) );
     }
 }

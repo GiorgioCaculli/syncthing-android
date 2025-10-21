@@ -31,7 +31,7 @@ public class ExternalVersioningFragment extends Fragment
         mView = inflater.inflate( R.layout.fragment_external_versioning, container, false );
         mArguments = getArguments();
         fillArguments();
-        initateTextView();
+        initiateTextView();
         return mView;
     }
 
@@ -48,7 +48,7 @@ public class ExternalVersioningFragment extends Fragment
         return !mArguments.containsKey( "command" );
     }
 
-    private void initateTextView()
+    private void initiateTextView()
     {
         TextView commandTextView = mView.findViewById( R.id.commandTextView );
 

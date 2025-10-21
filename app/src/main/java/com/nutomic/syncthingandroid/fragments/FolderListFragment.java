@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.ListFragment;
 
 import com.nutomic.syncthingandroid.R;
@@ -20,6 +21,7 @@ import com.nutomic.syncthingandroid.service.SyncthingService;
 import com.nutomic.syncthingandroid.views.FoldersAdapter;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -70,7 +72,7 @@ public class FolderListFragment extends ListFragment implements SyncthingService
     }
 
     @Override
-    public void onViewCreated( View view, Bundle savedInstanceState )
+    public void onViewCreated( @NonNull View view, Bundle savedInstanceState )
     {
         super.onViewCreated( view, savedInstanceState );
 
@@ -121,12 +123,12 @@ public class FolderListFragment extends ListFragment implements SyncthingService
     {
         Intent intent = new Intent( getActivity(), FolderActivity.class )
                 .putExtra( FolderActivity.EXTRA_IS_CREATE, false )
-                .putExtra( FolderActivity.EXTRA_FOLDER_ID, mAdapter.getItem( i ).id );
+                .putExtra( FolderActivity.EXTRA_FOLDER_ID, Objects.requireNonNull( mAdapter.getItem( i ) ).id );
         startActivity( intent );
     }
 
     @Override
-    public void onCreateOptionsMenu( Menu menu, MenuInflater inflater )
+    public void onCreateOptionsMenu( @NonNull Menu menu, MenuInflater inflater )
     {
         inflater.inflate( R.menu.folder_list, menu );
     }

@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -34,6 +35,7 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -148,7 +150,7 @@ public class DrawerFragment extends Fragment implements View.OnClickListener
     }
 
     @Override
-    public void onSaveInstanceState( Bundle outState )
+    public void onSaveInstanceState( @NonNull Bundle outState )
     {
         super.onSaveInstanceState( outState );
         outState.putBoolean( "active", mTimer != null );
@@ -209,7 +211,7 @@ public class DrawerFragment extends Fragment implements View.OnClickListener
         int color = ( announceConnected > 0 )
                 ? R.color.text_green
                 : R.color.text_red;
-        mAnnounceServer.setTextColor( ContextCompat.getColor( getContext(), color ) );
+        mAnnounceServer.setTextColor( ContextCompat.getColor( Objects.requireNonNull( getContext() ), color ) );
     }
 
     /**
