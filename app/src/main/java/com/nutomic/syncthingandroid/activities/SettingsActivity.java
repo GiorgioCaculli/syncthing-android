@@ -47,6 +47,9 @@ import javax.inject.Inject;
 
 import eu.chainfire.libsuperuser.Shell;
 
+/**
+ * TODO: Massive rewrite and readaptation of deprecated functions and executions
+ */
 public class SettingsActivity extends SyncthingActivity
 {
 
@@ -76,11 +79,9 @@ public class SettingsActivity extends SyncthingActivity
         if ( requestCode == Constants.PermissionRequestType.LOCATION.ordinal() )
         {
             boolean granted = grantResults.length > 0;
-            for ( int i = 0;
-                  i < grantResults.length;
-                  i++ )
+            for ( int grantResult : grantResults )
             {
-                if ( grantResults[ i ] != PackageManager.PERMISSION_GRANTED )
+                if ( grantResult != PackageManager.PERMISSION_GRANTED )
                 {
                     granted = false;
                     break;
@@ -562,11 +563,12 @@ public class SettingsActivity extends SyncthingActivity
         {
             switch ( preference.getKey() )
             {
-                case Constants.PREF_DEBUG_FACILITIES_ENABLED:
+                case Constants.PREF_DEBUG_FACILITIES_ENABLED,
+                     Constants.PREF_USE_WAKE_LOCK:
                     mPendingConfig = true;
                     break;
                 case Constants.PREF_ENVIRONMENT_VARIABLES:
-                    if ( ( ( String ) o ).matches( "^(\\w+=[\\w:/\\.]+)?( \\w+=[\\w:/\\.]+)*$" ) )
+                    if ( ( ( String ) o ).matches( "^(\\w+=[\\w:/.]+)?( \\w+=[\\w:/.]+)*$" ) )
                     {
                         mPendingConfig = true;
                     }
@@ -576,9 +578,6 @@ public class SettingsActivity extends SyncthingActivity
                                 .show();
                         return false;
                     }
-                    break;
-                case Constants.PREF_USE_WAKE_LOCK:
-                    mPendingConfig = true;
                     break;
                 case Constants.PREF_USE_TOR:
                     mSocksProxyAddress.setEnabled( !( Boolean ) o );
@@ -747,7 +746,7 @@ public class SettingsActivity extends SyncthingActivity
         private boolean handleSocksProxyPreferenceChange( Preference preference, String newValue )
         {
             // Valid input is either a proxy address or an empty field to disable the proxy.
-            if ( newValue.equals( "" ) )
+            if ( newValue.isEmpty() )
             {
                 preference.setSummary( getString( R.string.do_not_use_proxy ) + " " + getString( R.string.generic_example ) + ": " + getString( R.string.socks_proxy_address_example ) );
                 return true;
@@ -772,7 +771,7 @@ public class SettingsActivity extends SyncthingActivity
         private boolean handleHttpProxyPreferenceChange( Preference preference, String newValue )
         {
             // Valid input is either a proxy address or an empty field to disable the proxy.
-            if ( newValue.equals( "" ) )
+            if ( newValue.isEmpty() )
             {
                 preference.setSummary( getString( R.string.do_not_use_proxy ) + " " + getString( R.string.generic_example ) + ": " + getString( R.string.http_proxy_address_example ) );
                 return true;

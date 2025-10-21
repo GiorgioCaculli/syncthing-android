@@ -21,6 +21,7 @@ import com.nutomic.syncthingandroid.service.SyncthingService.State;
 import com.nutomic.syncthingandroid.util.Util;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -52,13 +53,9 @@ public abstract class StateDialogActivity extends SyncthingActivity
     {
         super.onResume();
         mIsPaused = false;
-        switch ( mServiceState )
+        if ( Objects.requireNonNull( mServiceState ) == State.DISABLED )
         {
-            case DISABLED:
-                showDisabledDialog();
-                break;
-            default:
-                break;
+            showDisabledDialog();
         }
     }
 
@@ -160,7 +157,7 @@ public abstract class StateDialogActivity extends SyncthingActivity
                 message.append( "\n" );
                 if ( reasons.size() > 1 )
                 {
-                    message.append( count + ". " );
+                    message.append( count ).append( ". " );
                 }
                 message.append( this.getString( reason.getResId() ) );
             }

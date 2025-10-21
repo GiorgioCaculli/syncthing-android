@@ -47,6 +47,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -109,7 +110,7 @@ public class WebGuiActivity extends StateDialogActivity
         public boolean shouldOverrideUrlLoading( WebView view, String url )
         {
             Uri uri = Uri.parse( url );
-            if ( uri.getHost().equals( getService().getWebGuiUrl().getHost() ) )
+            if ( Objects.equals( uri.getHost(), getService().getWebGuiUrl().getHost() ) )
             {
                 return false;
             }
@@ -147,19 +148,20 @@ public class WebGuiActivity extends StateDialogActivity
 
         try
         {
-            Class applictionCls = Class.forName( "android.app.Application" );
+            Class< ? > applictionCls = Class.forName( "android.app.Application" );
             Field loadedApkField = applictionCls.getDeclaredField( "mLoadedApk" );
             loadedApkField.setAccessible( true );
             Object loadedApk = loadedApkField.get( appContext );
-            Class loadedApkCls = Class.forName( "android.app.LoadedApk" );
+            Class< ? > loadedApkCls = Class.forName( "android.app.LoadedApk" );
             Field receiversField = loadedApkCls.getDeclaredField( "mReceivers" );
             receiversField.setAccessible( true );
             ArrayMap receivers = ( ArrayMap ) receiversField.get( loadedApk );
+            assert receivers != null;
             for ( Object receiverMap : receivers.values() )
             {
                 for ( Object rec : ( ( ArrayMap ) receiverMap ).keySet() )
                 {
-                    Class clazz = rec.getClass();
+                    Class< ? > clazz = rec.getClass();
                     if ( clazz.getName().contains( "ProxyChangeListener" ) )
                     {
                         Method onReceiveMethod = clazz.getDeclaredMethod( "onReceive", Context.class, Intent.class );
@@ -167,8 +169,8 @@ public class WebGuiActivity extends StateDialogActivity
 
                         String CLASS_NAME;
                         CLASS_NAME = "android.net.ProxyInfo";
-                        Class cls = Class.forName( CLASS_NAME );
-                        Constructor constructor = cls.getConstructor( String.class, Integer.TYPE, String.class );
+                        Class< ? > cls = Class.forName( CLASS_NAME );
+                        Constructor< ? > constructor = cls.getConstructor( String.class, Integer.TYPE, String.class );
                         constructor.setAccessible( true );
                         Object proxyProperties = constructor.newInstance( host, port, exclusionList );
                         intent.putExtra( "proxy", ( Parcelable ) proxyProperties );
@@ -234,11 +236,6 @@ public class WebGuiActivity extends StateDialogActivity
         Log.v( TAG, "onServiceStateChange(" + newState + ")" );
         if ( newState == SyncthingService.State.ACTIVE )
         {
-            if ( binding.webview == null )
-            {
-                Log.v( TAG, "onWebGuiAvailable: Skipped event due to mWebView == null" );
-                return;
-            }
             if ( binding.webview.getUrl() == null )
             {
                 binding.webview.stopLoading();

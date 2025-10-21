@@ -7,7 +7,7 @@ plugins {
 tasks.register<PythonTask>("buildNative") {
     val ndkVersionShared = rootProject.extra.get("ndkVersionShared")
     environment("NDK_VERSION", "$ndkVersionShared")
-    //environment("ANDROID_HOME", "${DIR}/Android/Sdk")
+    environment("ANDROID_HOME", "/home/gzc/Android/Sdk")
     // https://github.com/syncthing/syncthing/pull/10211
     environment("EXTRA_LDFLAGS", "\"-checklinkname=0\"")
     inputs.dir("$projectDir/src/")

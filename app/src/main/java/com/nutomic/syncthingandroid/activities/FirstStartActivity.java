@@ -2,7 +2,6 @@ package com.nutomic.syncthingandroid.activities;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -54,7 +53,6 @@ public class FirstStartActivity extends Activity
     private static final String TAG = "FirstStartActivity";
     @Inject
     SharedPreferences mPreferences;
-    private ViewPagerAdapter mViewPagerAdapter;
     private TextView[] mDots;
 
     private ActivityFirstStartBinding binding;
@@ -91,7 +89,7 @@ public class FirstStartActivity extends Activity
         super.onCreate( savedInstanceState );
         ( ( SyncthingApp ) getApplication() ).component().inject( this );
 
-        /**
+        /*
          * Recheck storage permission. If it has been revoked after the user
          * completed the welcome slides, displays the slides again.
          */
@@ -120,7 +118,7 @@ public class FirstStartActivity extends Activity
         addBottomDots();
         setActiveBottomDot( 0 );
 
-        mViewPagerAdapter = new ViewPagerAdapter();
+        ViewPagerAdapter mViewPagerAdapter = new ViewPagerAdapter();
         binding.viewPager.setAdapter( mViewPagerAdapter );
         binding.viewPager.addOnPageChangeListener( mViewPagerPageChangeListener );
 
@@ -171,7 +169,7 @@ public class FirstStartActivity extends Activity
         {
             case STORAGE:
                 // As the storage permission is a prerequisite to run syncthing, refuse to continue without it.
-                Boolean storagePermissionsGranted = PermissionUtil.haveStoragePermission( this );
+                boolean storagePermissionsGranted = PermissionUtil.haveStoragePermission( this );
                 if ( !storagePermissionsGranted )
                 {
                     Toast.makeText( this, R.string.toast_write_storage_permission_required,
@@ -214,13 +212,9 @@ public class FirstStartActivity extends Activity
         return mPreferences.getBoolean( Constants.PREF_FIRST_START, true );
     }
 
-    @TargetApi( 33 )
+    @androidx.annotation.RequiresApi( 33 )
     private boolean isNotificationPermissionGranted()
     {
-        if ( Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU )
-        {
-            return true;
-        }
 
         return ActivityCompat.checkSelfPermission( this, Manifest.permission.POST_NOTIFICATIONS ) == PackageManager.PERMISSION_GRANTED;
 
@@ -283,7 +277,10 @@ public class FirstStartActivity extends Activity
                 return upgradedToApiLevel30()
                         || mPreferences.getBoolean( Constants.PREF_USE_ROOT, false );
             case NOTIFICATION:
-                return isNotificationPermissionGranted();
+                if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU )
+                {
+                    return isNotificationPermissionGranted();
+                }
 
         }
         return false;
@@ -323,7 +320,7 @@ public class FirstStartActivity extends Activity
         Boolean doInitialKeyGeneration = !Constants.getConfigFile( this ).exists();
         Intent mainIntent = new Intent( this, MainActivity.class );
         mainIntent.putExtra( MainActivity.EXTRA_KEY_GENERATION_IN_PROGRESS, doInitialKeyGeneration );
-        /**
+        /*
          * In case start_into_web_gui option is enabled, start both activities
          * so that back navigation works as expected.
          */
@@ -360,7 +357,7 @@ public class FirstStartActivity extends Activity
                 Constants.PermissionRequestType.LOCATION.ordinal() );
     }
 
-    @TargetApi( 33 )
+    @androidx.annotation.RequiresApi( 33 )
     private void requestNotificationPermission()
     {
         if ( ActivityCompat.checkSelfPermission( this, Manifest.permission.POST_NOTIFICATIONS ) != PackageManager.PERMISSION_GRANTED )
@@ -383,7 +380,7 @@ public class FirstStartActivity extends Activity
         }
     }
 
-    @TargetApi( 30 )
+    @androidx.annotation.RequiresApi( 30 )
     private void requestAllFilesAccessPermission()
     {
         Intent intent = new Intent( Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION );
@@ -475,16 +472,16 @@ public class FirstStartActivity extends Activity
      */
     public class ViewPagerAdapter extends PagerAdapter
     {
-        private LayoutInflater layoutInflater;
 
         public ViewPagerAdapter()
         {
         }
 
+        @NonNull
         @Override
-        public Object instantiateItem( ViewGroup container, int position )
+        public Object instantiateItem( @NonNull ViewGroup container, int position )
         {
-            layoutInflater = ( LayoutInflater ) getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+            LayoutInflater layoutInflater = ( LayoutInflater ) getSystemService( Context.LAYOUT_INFLATER_SERVICE );
 
             View view = layoutInflater.inflate( slides[ position ].layout, container, false );
 
@@ -536,7 +533,10 @@ public class FirstStartActivity extends Activity
                         @Override
                         public void onClick( View v )
                         {
-                            requestNotificationPermission();
+                            if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU )
+                            {
+                                requestNotificationPermission();
+                            }
                         }
                     } );
                     break;
@@ -553,13 +553,13 @@ public class FirstStartActivity extends Activity
         }
 
         @Override
-        public boolean isViewFromObject( View view, Object obj )
+        public boolean isViewFromObject( @NonNull View view, @NonNull Object obj )
         {
             return view == obj;
         }
 
         @Override
-        public void destroyItem( ViewGroup container, int position, Object object )
+        public void destroyItem( ViewGroup container, int position, @NonNull Object object )
         {
             View view = ( View ) object;
             container.removeView( view );

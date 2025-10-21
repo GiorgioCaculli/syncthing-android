@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -19,6 +20,7 @@ import com.nutomic.syncthingandroid.fragments.dialog.TrashCanVersioningFragment;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class VersioningDialogActivity extends ThemedAppCompatActivity
 {
@@ -45,7 +47,7 @@ public class VersioningDialogActivity extends ThemedAppCompatActivity
             mArguments = getIntent().getExtras();
         }
 
-        updateFragmentView( mTypes.indexOf( getIntent().getExtras().getString( "type" ) ) );
+        updateFragmentView( mTypes.indexOf( Objects.requireNonNull( getIntent().getExtras() ).getString( "type" ) ) );
         initiateFinishBtn();
         initiateSpinner();
     }
@@ -62,19 +64,20 @@ public class VersioningDialogActivity extends ThemedAppCompatActivity
     private void saveConfiguration()
     {
         Intent intent = new Intent();
+        assert mCurrentFragment.getArguments() != null;
         intent.putExtras( mCurrentFragment.getArguments() );
         setResult( Activity.RESULT_OK, intent );
     }
 
     private void initiateSpinner()
     {
-        binding.versioningTypeSpinner.setSelection( mTypes.indexOf( getIntent().getExtras().getString( "type" ) ) );
+        binding.versioningTypeSpinner.setSelection( mTypes.indexOf( Objects.requireNonNull( getIntent().getExtras() ).getString( "type" ) ) );
         binding.versioningTypeSpinner.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener()
         {
             @Override
             public void onItemSelected( AdapterView< ? > parent, View view, int position, long id )
             {
-                if ( position != mTypes.indexOf( getIntent().getExtras().getString( "type" ) ) )
+                if ( position != mTypes.indexOf( Objects.requireNonNull( getIntent().getExtras() ).getString( "type" ) ) )
                 {
                     updateVersioningType( position );
                     updateFragmentView( position );
@@ -113,32 +116,20 @@ public class VersioningDialogActivity extends ThemedAppCompatActivity
 
     private Fragment getFragment( int selection )
     {
-        Fragment fragment = null;
 
-        switch ( selection )
+        return switch ( selection )
         {
-            case 0:
-                fragment = new NoVersioningFragment();
-                break;
-            case 1:
-                fragment = new TrashCanVersioningFragment();
-                break;
-            case 2:
-                fragment = new SimpleVersioningFragment();
-                break;
-            case 3:
-                fragment = new StaggeredVersioningFragment();
-                break;
-            case 4:
-                fragment = new ExternalVersioningFragment();
-                break;
-        }
-
-        return fragment;
+            case 0 -> new NoVersioningFragment();
+            case 1 -> new TrashCanVersioningFragment();
+            case 2 -> new SimpleVersioningFragment();
+            case 3 -> new StaggeredVersioningFragment();
+            case 4 -> new ExternalVersioningFragment();
+            default -> null;
+        };
     }
 
     @Override
-    protected void onSaveInstanceState( Bundle outState )
+    protected void onSaveInstanceState( @NonNull Bundle outState )
     {
         super.onSaveInstanceState( outState );
         outState.putBundle( "arguments", mCurrentFragment.getArguments() );

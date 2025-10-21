@@ -27,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.google.android.material.materialswitch.MaterialSwitch;
@@ -46,6 +47,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -262,7 +264,7 @@ public class FolderActivity extends SyncthingActivity
         }
         if ( !mCanWriteToPath )
         {
-            /**
+            /*
              * Do not handle the click as the children in the folder type layout are disabled
              * and an explanation is already given on the UI why the only allowed folder type
              * is "sendonly".
@@ -319,7 +321,7 @@ public class FolderActivity extends SyncthingActivity
         if ( syncthingService != null )
         {
             syncthingService.getNotificationHandler().cancelConsentNotification( getIntent().getIntExtra( EXTRA_NOTIFICATION_ID, 0 ) );
-            syncthingService.unregisterOnServiceStateChangeListener( this::onServiceStateChange );
+            syncthingService.unregisterOnServiceStateChangeListener( this );
         }
         binding.label.removeTextChangedListener( mTextWatcher );
         binding.id.removeTextChangedListener( mTextWatcher );
@@ -339,7 +341,7 @@ public class FolderActivity extends SyncthingActivity
     }
 
     @Override
-    protected void onSaveInstanceState( Bundle outState )
+    protected void onSaveInstanceState( @NonNull Bundle outState )
     {
         super.onSaveInstanceState( outState );
         outState.putBoolean( IS_SHOWING_DELETE_DIALOG, mDeleteDialog != null && mDeleteDialog.isShowing() );
@@ -489,7 +491,7 @@ public class FolderActivity extends SyncthingActivity
                 }
                 if ( mFolderUri != null )
                 {
-                    /**
+                    /*
                      * Normally, syncthing takes care of creating the ".stfolder" marker.
                      * This fails on newer android versions if the syncthing binary only has
                      * readonly access on the path and the user tries to configure a
@@ -502,6 +504,7 @@ public class FolderActivity extends SyncthingActivity
                     {
                         Log.v( TAG, "Creating new directory " + mFolder.path + File.separator + FOLDER_MARKER_NAME );
                         DocumentFile marker = dfFolder.createDirectory( FOLDER_MARKER_NAME );
+                        assert marker != null;
                         marker.createFile( "text/plain", "empty" );
                     }
                 }
@@ -612,7 +615,7 @@ public class FolderActivity extends SyncthingActivity
             return;
         }
 
-        /**
+        /*
          * Check if the permissions we have on that folder is readonly or readwrite.
          * Access level readonly: folder can only be configured "sendonly".
          * Access level readwrite: folder can be configured "sendonly" or "sendreceive".
@@ -625,7 +628,7 @@ public class FolderActivity extends SyncthingActivity
             binding.editIgnores.setEnabled( true );
             if ( mIsCreateMode )
             {
-                /**
+                /*
                  * Suggest folder type FOLDER_TYPE_SEND_RECEIVE for folders to be created
                  * because the user most probably intentionally chose a special folder like
                  * "[storage]/Android/data/com.nutomic.syncthingandroid/files"
@@ -674,7 +677,7 @@ public class FolderActivity extends SyncthingActivity
         mFolder.label = getIntent().getStringExtra( EXTRA_FOLDER_LABEL );
         mFolder.fsWatcherEnabled = true;
         mFolder.fsWatcherDelayS = 10;
-        /**
+        /*
          * Folder rescan interval defaults to 3600s as it is the default in
          * syncthing when the file watcher is enabled and a new folder is created.
          */
@@ -713,7 +716,7 @@ public class FolderActivity extends SyncthingActivity
     {
         if ( !mIsCreateMode )
         {
-            /**
+            /*
              * RestApi is guaranteed not to be null as {@link onServiceStateChange}
              * immediately finishes this activity if SyncthingService shuts down.
              */
@@ -763,6 +766,7 @@ public class FolderActivity extends SyncthingActivity
         String type = arguments.getString( "type" );
         arguments.remove( "type" );
 
+        assert type != null;
         if ( type.equals( "none" ) )
         {
             mVersioning = new Folder.Versioning();
@@ -884,7 +888,7 @@ public class FolderActivity extends SyncthingActivity
                         getString( R.string.trashcan_versioning_info, mFolder.versioning.params.get( "cleanoutDays" ) ) );
                 break;
             case "staggered":
-                int maxAge = ( int ) TimeUnit.SECONDS.toDays( Long.valueOf( mFolder.versioning.params.get( "maxAge" ) ) );
+                int maxAge = ( int ) TimeUnit.SECONDS.toDays( Long.parseLong( Objects.requireNonNull( mFolder.versioning.params.get( "maxAge" ) ) ) );
                 setVersioningDescription( getString( R.string.type_staggered ),
                         getString( R.string.staggered_versioning_info, maxAge, mFolder.versioning.params.get( "versionsPath" ) ) );
                 break;

@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.ShareActionProvider;
 import androidx.core.view.MenuItemCompat;
 
@@ -59,7 +60,7 @@ public class LogActivity extends SyncthingActivity
     }
 
     @Override
-    protected void onSaveInstanceState( Bundle outState )
+    protected void onSaveInstanceState( @NonNull Bundle outState )
     {
         super.onSaveInstanceState( outState );
         outState.putBoolean( "syncthingLog", mSyncthingLog );
@@ -81,6 +82,7 @@ public class LogActivity extends SyncthingActivity
         mShareIntent.setAction( Intent.ACTION_SEND );
         mShareIntent.setType( "text/plain" );
         mShareIntent.putExtra( android.content.Intent.EXTRA_TEXT, mLog.getText() );
+        assert actionProvider != null;
         actionProvider.setShareIntent( mShareIntent );
 
         return true;
@@ -89,25 +91,23 @@ public class LogActivity extends SyncthingActivity
     @Override
     public boolean onOptionsItemSelected( MenuItem item )
     {
-        switch ( item.getItemId() )
+        if ( item.getItemId() == R.id.switch_logs )
         {
-            case R.id.switch_logs:
-                mSyncthingLog = !mSyncthingLog;
-                if ( mSyncthingLog )
-                {
-                    item.setTitle( R.string.view_android_log );
-                    setTitle( R.string.syncthing_log_title );
-                }
-                else
-                {
-                    item.setTitle( R.string.view_syncthing_log );
-                    setTitle( R.string.android_log_title );
-                }
-                updateLog();
-                return true;
-            default:
-                return super.onOptionsItemSelected( item );
+            mSyncthingLog = !mSyncthingLog;
+            if ( mSyncthingLog )
+            {
+                item.setTitle( R.string.view_android_log );
+                setTitle( R.string.syncthing_log_title );
+            }
+            else
+            {
+                item.setTitle( R.string.view_syncthing_log );
+                setTitle( R.string.android_log_title );
+            }
+            updateLog();
+            return true;
         }
+        return super.onOptionsItemSelected( item );
     }
 
     private void updateLog()
@@ -183,7 +183,7 @@ public class LogActivity extends SyncthingActivity
                         new InputStreamReader( process.getInputStream(), StandardCharsets.UTF_8 ), 8192 );
                 StringBuilder log = new StringBuilder();
                 String line;
-                String sep = System.getProperty( "line.separator" );
+                String sep = System.lineSeparator();
                 while ( ( line = bufferedReader.readLine() ) != null )
                 {
                     log.append( line );

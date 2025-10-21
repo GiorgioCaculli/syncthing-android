@@ -28,7 +28,7 @@ public class ThemedAppCompatActivity extends AppCompatActivity
         ( ( SyncthingApp ) getApplication() ).component().inject( this );
         // Load theme.
         //For api level below 28, Follow system fall backs to light mode
-        Integer prefAppTheme = Integer.parseInt( mPreferences.getString( Constants.PREF_APP_THEME, FOLLOW_SYSTEM ) );
+        int prefAppTheme = Integer.parseInt( mPreferences.getString( Constants.PREF_APP_THEME, FOLLOW_SYSTEM ) );
         AppCompatDelegate.setDefaultNightMode( prefAppTheme );
         super.onCreate( savedInstanceState );
     }

@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -234,7 +235,7 @@ public class ShareActivity extends StateDialogActivity
             if ( displayName == null )
             {
                 // last chance to have a name
-                displayName = uri.getLastPathSegment().replaceAll( "\\s", "" );
+                displayName = Objects.requireNonNull( uri.getLastPathSegment() ).replaceAll( "\\s", "" );
             }
 
             // Add best possible extension
@@ -344,6 +345,7 @@ public class ShareActivity extends StateDialogActivity
             String folderDirectory = Util.formatPath( selectedFolder.path );
             String subDirectory = data.getStringExtra( FolderPickerActivity.EXTRA_RESULT_DIRECTORY );
             //Remove the parent directory from the string, so it is only the Sub directory that is displayed to the user.
+            assert subDirectory != null;
             subDirectory = subDirectory.replace( folderDirectory, "" );
             mSubDirectoryTextView.setText( subDirectory );
 
@@ -402,6 +404,7 @@ public class ShareActivity extends StateDialogActivity
                         continue;
                     }
                     inputStream = shareActivity.getContentResolver().openInputStream( entry.getKey() );
+                    assert inputStream != null;
                     Files.asByteSink( outFile ).writeFrom( inputStream );
                     mCopied++;
                 }

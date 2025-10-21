@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -102,14 +103,14 @@ public class FolderPickerActivity extends SyncthingActivity
 
         if ( getIntent().hasExtra( EXTRA_INITIAL_DIRECTORY ) )
         {
-            displayFolder( new File( getIntent().getStringExtra( EXTRA_INITIAL_DIRECTORY ) ) );
+            displayFolder( new File( Objects.requireNonNull( getIntent().getStringExtra( EXTRA_INITIAL_DIRECTORY ) ) ) );
         }
         else
         {
             displayRoot();
         }
 
-        Boolean prefUseRoot = mPreferences.getBoolean( Constants.PREF_USE_ROOT, false );
+        boolean prefUseRoot = mPreferences.getBoolean( Constants.PREF_USE_ROOT, false );
         if ( !prefUseRoot )
         {
             Toast.makeText( this, R.string.kitkat_external_storage_warning, Toast.LENGTH_LONG )
@@ -125,8 +126,7 @@ public class FolderPickerActivity extends SyncthingActivity
     @SuppressLint( "NewApi" )
     private void populateRoots()
     {
-        ArrayList< File > roots = new ArrayList<>();
-        roots.addAll( Arrays.asList( getExternalFilesDirs( null ) ) );
+        ArrayList< File > roots = new ArrayList<>( Arrays.asList( getExternalFilesDirs( null ) ) );
         roots.remove( getExternalFilesDir( null ) );
 
         String rootDir = getIntent().getStringExtra( EXTRA_ROOT_DIRECTORY );
@@ -146,7 +146,7 @@ public class FolderPickerActivity extends SyncthingActivity
             // Add paths that might not be accessible to Syncthing.
             if ( mPreferences.getBoolean( "advanced_folder_picker", false ) )
             {
-                Collections.addAll( roots, new File( "/storage/" ).listFiles() );
+                Collections.addAll( roots, Objects.requireNonNull( new File( "/storage/" ).listFiles() ) );
                 roots.add( new File( "/" ) );
             }
         }
@@ -179,7 +179,7 @@ public class FolderPickerActivity extends SyncthingActivity
         SyncthingService syncthingService = getService();
         if ( syncthingService != null )
         {
-            syncthingService.unregisterOnServiceStateChangeListener( this::onServiceStateChange );
+            syncthingService.unregisterOnServiceStateChangeListener( this );
         }
     }
 
@@ -285,6 +285,7 @@ public class FolderPickerActivity extends SyncthingActivity
         @SuppressWarnings( "unchecked" )
         ArrayAdapter< File > adapter = ( ArrayAdapter< File > ) mListView.getAdapter();
         File f = adapter.getItem( i );
+        assert f != null;
         if ( f.isDirectory() )
         {
             displayFolder( f );
@@ -306,6 +307,7 @@ public class FolderPickerActivity extends SyncthingActivity
     @Override
     public void onBackPressed()
     {
+        super.onBackPressed();
         if ( !mRootsAdapter.contains( mLocation ) && mLocation != null )
         {
             displayFolder( mLocation.getParentFile() );
@@ -365,6 +367,7 @@ public class FolderPickerActivity extends SyncthingActivity
             convertView = super.getView( position, convertView, parent );
             TextView title = convertView.findViewById( android.R.id.text1 );
             File f = getItem( position );
+            assert f != null;
             title.setText( f.getName() );
             int textColor = ( f.isDirectory() )
                     ? android.R.color.primary_text_light
@@ -389,7 +392,7 @@ public class FolderPickerActivity extends SyncthingActivity
         {
             convertView = super.getView( position, convertView, parent );
             TextView title = convertView.findViewById( android.R.id.text1 );
-            title.setText( getItem( position ).getAbsolutePath() );
+            title.setText( Objects.requireNonNull( getItem( position ) ).getAbsolutePath() );
             return convertView;
         }
 
@@ -399,7 +402,7 @@ public class FolderPickerActivity extends SyncthingActivity
                   i < getCount();
                   i++ )
             {
-                if ( getItem( i ).equals( file ) )
+                if ( Objects.equals( getItem( i ), file ) )
                 {
                     return true;
                 }

@@ -33,6 +33,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
@@ -99,15 +100,12 @@ public class MainActivity extends StateDialogActivity
                 @Override
                 public Fragment getItem( int position )
                 {
-                    switch ( position )
+                    return switch ( position )
                     {
-                        case 0:
-                            return mFolderListFragment;
-                        case 1:
-                            return mDeviceListFragment;
-                        default:
-                            return null;
-                    }
+                        case 0 -> mFolderListFragment;
+                        case 1 -> mDeviceListFragment;
+                        default -> null;
+                    };
                 }
 
                 @Override
@@ -119,15 +117,12 @@ public class MainActivity extends StateDialogActivity
                 @Override
                 public CharSequence getPageTitle( int position )
                 {
-                    switch ( position )
+                    return switch ( position )
                     {
-                        case 0:
-                            return getResources().getString( R.string.folders_fragment_title );
-                        case 1:
-                            return getResources().getString( R.string.devices_fragment_title );
-                        default:
-                            return String.valueOf( position );
-                    }
+                        case 0 -> getResources().getString( R.string.folders_fragment_title );
+                        case 1 -> getResources().getString( R.string.devices_fragment_title );
+                        default -> String.valueOf( position );
+                    };
                 }
             };
     private DrawerFragment mDrawerFragment;
@@ -151,7 +146,7 @@ public class MainActivity extends StateDialogActivity
                 mDrawerFragment.requestGuiUpdate();
 
                 // Check if the usage reporting minimum delay passed by.
-                Boolean usageReportingDelayPassed = ( new Date().getTime() > getFirstStartTime() + USAGE_REPORTING_DIALOG_DELAY );
+                boolean usageReportingDelayPassed = ( new Date().getTime() > getFirstStartTime() + USAGE_REPORTING_DIALOG_DELAY );
                 RestApi restApi = getApi();
                 if ( usageReportingDelayPassed && restApi != null && !restApi.isUsageReportingDecided() )
                 {
@@ -340,7 +335,7 @@ public class MainActivity extends StateDialogActivity
      * Saves current tab index and fragment states.
      */
     @Override
-    protected void onSaveInstanceState( Bundle outState )
+    protected void onSaveInstanceState( @NonNull Bundle outState )
     {
         super.onSaveInstanceState( outState );
 
@@ -364,7 +359,9 @@ public class MainActivity extends StateDialogActivity
             outState.putBoolean( IS_QRCODE_DIALOG_DISPLAYED, true );
             ImageView qrCode = mQrCodeDialog.findViewById( R.id.qrcode_image_view );
             TextView deviceID = mQrCodeDialog.findViewById( R.id.device_id );
+            assert qrCode != null;
             outState.putParcelable( QRCODE_BITMAP_KEY, ( ( BitmapDrawable ) qrCode.getDrawable() ).getBitmap() );
+            assert deviceID != null;
             outState.putString( DEVICEID_KEY, deviceID.getText().toString() );
         }
         Util.dismissDialogSafe( mRestartDialog, this );
@@ -385,7 +382,7 @@ public class MainActivity extends StateDialogActivity
     }
 
     @Override
-    public void onConfigurationChanged( Configuration newConfig )
+    public void onConfigurationChanged( @NonNull Configuration newConfig )
     {
         super.onConfigurationChanged( newConfig );
         mDrawerToggle.onConfigurationChanged( newConfig );
@@ -438,7 +435,7 @@ public class MainActivity extends StateDialogActivity
     }
 
     @Override
-    public boolean onOptionsItemSelected( MenuItem item )
+    public boolean onOptionsItemSelected( @NonNull MenuItem item )
     {
         return mDrawerToggle.onOptionsItemSelected( item ) || super.onOptionsItemSelected( item );
     }
@@ -476,6 +473,7 @@ public class MainActivity extends StateDialogActivity
     @Override
     public void onBackPressed()
     {
+        super.onBackPressed();
         if ( mDrawerLayout.isDrawerOpen( GravityCompat.START ) )
         {
             // Close drawer on back button press.
@@ -483,7 +481,7 @@ public class MainActivity extends StateDialogActivity
         }
         else
         {
-            /**
+            /*
              * Leave MainActivity in its state as the home button was pressed.
              * This will avoid waiting for the loading spinner when getting back
              * and give changes to do UI updates based on EventProcessor in the future.
@@ -494,7 +492,7 @@ public class MainActivity extends StateDialogActivity
 
     /**
      * Calculating width based on
-     * http://www.google.com/design/spec/patterns/navigation-drawer.html#navigation-drawer-specs.
+     * <a href="http://www.google.com/design/spec/patterns/navigation-drawer.html#navigation-drawer-specs">Google Doc Navigation Drawer</a>.
      */
     private void setOptimalDrawerWidth( View drawerContainer )
     {
