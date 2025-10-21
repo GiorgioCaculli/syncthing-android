@@ -5,7 +5,6 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
@@ -49,38 +48,28 @@ class SyncthingTrustManager implements X509TrustManager
     public void checkServerTrusted( X509Certificate[] certs,
                                     String authType ) throws CertificateException
     {
-        InputStream is = null;
-        try
-        {
-            is = new FileInputStream( mHttpsCertPath );
-            CertificateFactory cf = CertificateFactory.getInstance( "X.509" );
-            X509Certificate ca = ( X509Certificate ) cf.generateCertificate( is );
-            for ( X509Certificate cert : certs )
-            {
-                cert.verify( ca.getPublicKey() );
-            }
-        }
-        catch ( FileNotFoundException |
-                NoSuchAlgorithmException |
-                InvalidKeyException |
-                NoSuchProviderException |
-                SignatureException e )
-        {
-            throw new CertificateException( "Untrusted Certificate!", e );
-        }
-        finally
+        try ( InputStream is = new FileInputStream( mHttpsCertPath ) )
         {
             try
             {
-                if ( is != null )
+                CertificateFactory cf = CertificateFactory.getInstance( "X.509" );
+                X509Certificate ca = ( X509Certificate ) cf.generateCertificate( is );
+                for ( X509Certificate cert : certs )
                 {
-                    is.close();
+                    cert.verify( ca.getPublicKey() );
                 }
             }
-            catch ( IOException e )
+            catch ( NoSuchAlgorithmException |
+                    InvalidKeyException |
+                    NoSuchProviderException |
+                    SignatureException e )
             {
-                Log.w( TAG, e );
+                throw new CertificateException( "Untrusted Certificate!", e );
             }
+        }
+        catch ( IOException e )
+        {
+            Log.w( TAG, e );
         }
     }
 

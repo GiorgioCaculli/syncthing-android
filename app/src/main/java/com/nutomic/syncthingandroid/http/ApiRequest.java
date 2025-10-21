@@ -9,7 +9,6 @@ import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
@@ -106,13 +105,13 @@ public abstract class ApiRequest
         } )
         {
             @Override
-            public Map< String, String > getHeaders() throws AuthFailureError
+            public Map< String, String > getHeaders()
             {
                 return ImmutableMap.of( HEADER_API_KEY, mApiKey );
             }
 
             @Override
-            public byte[] getBody() throws AuthFailureError
+            public byte[] getBody()
             {
                 return Optional.fromNullable( requestBody ).transform( String::getBytes ).orNull();
             }
@@ -147,7 +146,7 @@ public abstract class ApiRequest
         } )
         {
             @Override
-            public Map< String, String > getHeaders() throws AuthFailureError
+            public Map< String, String > getHeaders()
             {
                 return ImmutableMap.of( HEADER_API_KEY, mApiKey );
             }
