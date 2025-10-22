@@ -94,8 +94,8 @@ public class FolderActivity extends SyncthingActivity
         @Override
         public void afterTextChanged( Editable s )
         {
-            mFolder.label = binding.label.getText().toString();
-            mFolder.id = binding.id.getText().toString();
+            mFolder.setLabel( binding.label.getText().toString() );
+            mFolder.setId( binding.id.getText().toString() );
             // binding.directoryTextView must not be handled here as it's handled by {@link onActivityResult}
             mFolderNeedsToUpdate = true;
         }
@@ -109,22 +109,22 @@ public class FolderActivity extends SyncthingActivity
                     switch ( view.getId() )
                     {
                         case R.id.fileWatcher:
-                            mFolder.fsWatcherEnabled = isChecked;
+                            mFolder.setFsWatcherEnabled( isChecked );
                             mFolderNeedsToUpdate = true;
                             break;
                         case R.id.folderPause:
-                            mFolder.paused = isChecked;
+                            mFolder.setPaused( isChecked );
                             mFolderNeedsToUpdate = true;
                             break;
                         case R.id.device_toggle:
                             Device device = ( Device ) view.getTag();
                             if ( isChecked )
                             {
-                                mFolder.addDevice( device.deviceID );
+                                mFolder.addDevice( device.getDeviceID() );
                             }
                             else
                             {
-                                mFolder.removeDevice( device.deviceID );
+                                mFolder.removeDevice( device.getDeviceID() );
                             }
                             mFolderNeedsToUpdate = true;
                             break;
@@ -221,7 +221,7 @@ public class FolderActivity extends SyncthingActivity
         catch ( android.content.ActivityNotFoundException e )
         {
             Log.e( TAG, "onPathViewClick exception, falling back to built-in FolderPickerActivity.", e );
-            startActivityForResult( FolderPickerActivity.createIntent( this, mFolder.path, null ),
+            startActivityForResult( FolderPickerActivity.createIntent( this, mFolder.getPath(), null ),
                     FolderPickerActivity.DIRECTORY_REQUEST_CODE );
         }
     }
@@ -230,7 +230,7 @@ public class FolderActivity extends SyncthingActivity
     {
         try
         {
-            File ignoreFile = new File( mFolder.path, IGNORE_FILE_NAME );
+            File ignoreFile = new File( mFolder.getPath(), IGNORE_FILE_NAME );
             if ( !ignoreFile.exists() && !ignoreFile.createNewFile() )
             {
                 Toast.makeText( this, R.string.create_ignore_file_error, Toast.LENGTH_SHORT ).show();
@@ -256,7 +256,7 @@ public class FolderActivity extends SyncthingActivity
 
     private void showFolderTypeDialog()
     {
-        if ( TextUtils.isEmpty( mFolder.path ) )
+        if ( TextUtils.isEmpty( mFolder.getPath() ) )
         {
             Toast.makeText( this, R.string.folder_path_required, Toast.LENGTH_LONG )
                     .show();
@@ -275,14 +275,14 @@ public class FolderActivity extends SyncthingActivity
         }
         // The user selected folder path is writeable, offer to choose from all available folder types.
         Intent intent = new Intent( this, FolderTypeDialogActivity.class );
-        intent.putExtra( FolderTypeDialogActivity.EXTRA_FOLDER_TYPE, mFolder.type );
+        intent.putExtra( FolderTypeDialogActivity.EXTRA_FOLDER_TYPE, mFolder.getType() );
         startActivityForResult( intent, FOLDER_TYPE_DIALOG_REQUEST );
     }
 
     private void showPullOrderDialog()
     {
         Intent intent = new Intent( this, PullOrderDialogActivity.class );
-        intent.putExtra( PullOrderDialogActivity.EXTRA_PULL_ORDER, mFolder.order );
+        intent.putExtra( PullOrderDialogActivity.EXTRA_PULL_ORDER, mFolder.getOrder() );
         startActivityForResult( intent, PULL_ORDER_DIALOG_REQUEST );
     }
 
@@ -296,18 +296,18 @@ public class FolderActivity extends SyncthingActivity
     private Bundle getVersioningBundle()
     {
         Bundle bundle = new Bundle();
-        for ( Map.Entry< String, String > entry : mFolder.versioning.params.entrySet() )
+        for ( Map.Entry< String, String > entry : mFolder.getVersioning().params.entrySet() )
         {
             bundle.putString( entry.getKey(), entry.getValue() );
         }
 
-        if ( TextUtils.isEmpty( mFolder.versioning.type ) )
+        if ( TextUtils.isEmpty( mFolder.getVersioning().type ) )
         {
             bundle.putString( "type", "none" );
         }
         else
         {
-            bundle.putString( "type", mFolder.versioning.type );
+            bundle.putString( "type", mFolder.getVersioning().type );
         }
 
         return bundle;
@@ -382,7 +382,7 @@ public class FolderActivity extends SyncthingActivity
             mFolder = null;
             for ( Folder currentFolder : folders )
             {
-                if ( currentFolder.id.equals( passedId ) )
+                if ( currentFolder.getId().equals( passedId ) )
                 {
                     mFolder = currentFolder;
                     break;
@@ -414,7 +414,7 @@ public class FolderActivity extends SyncthingActivity
     {
         if ( mFolder != null && mVersioning != null )
         {
-            mFolder.versioning = mVersioning;
+            mFolder.setVersioning( mVersioning );
             mVersioning = null;
         }
     }
@@ -427,13 +427,13 @@ public class FolderActivity extends SyncthingActivity
         binding.folderPause.setOnCheckedChangeListener( null );
 
         // Update views
-        binding.label.setText( mFolder.label );
-        binding.id.setText( mFolder.id );
+        binding.label.setText( mFolder.getLabel() );
+        binding.id.setText( mFolder.getId() );
         updateFolderTypeDescription();
         updatePullOrderDescription();
         updateVersioningDescription();
-        binding.fileWatcher.setChecked( mFolder.fsWatcherEnabled );
-        binding.folderPause.setChecked( mFolder.paused );
+        binding.fileWatcher.setChecked( mFolder.isFsWatcherEnabled() );
+        binding.folderPause.setChecked( mFolder.isPaused() );
         List< Device > devicesList = getApi().getDevices( false );
 
         binding.devicesContainer.removeAllViews();
@@ -477,13 +477,13 @@ public class FolderActivity extends SyncthingActivity
         switch ( item.getItemId() )
         {
             case R.id.create:
-                if ( TextUtils.isEmpty( mFolder.id ) )
+                if ( TextUtils.isEmpty( mFolder.getId() ) )
                 {
                     Toast.makeText( this, R.string.folder_id_required, Toast.LENGTH_LONG )
                             .show();
                     return true;
                 }
-                if ( TextUtils.isEmpty( mFolder.path ) )
+                if ( TextUtils.isEmpty( mFolder.getPath() ) )
                 {
                     Toast.makeText( this, R.string.folder_path_required, Toast.LENGTH_LONG )
                             .show();
@@ -502,7 +502,7 @@ public class FolderActivity extends SyncthingActivity
                     DocumentFile dfFolder = DocumentFile.fromTreeUri( this, mFolderUri );
                     if ( dfFolder != null )
                     {
-                        Log.v( TAG, "Creating new directory " + mFolder.path + File.separator + FOLDER_MARKER_NAME );
+                        Log.v( TAG, "Creating new directory " + mFolder.getPath() + File.separator + FOLDER_MARKER_NAME );
                         DocumentFile marker = dfFolder.createDirectory( FOLDER_MARKER_NAME );
                         assert marker != null;
                         marker.createFile( "text/plain", "empty" );
@@ -537,7 +537,7 @@ public class FolderActivity extends SyncthingActivity
                     RestApi restApi = getApi();
                     if ( restApi != null )
                     {
-                        restApi.removeFolder( mFolder.id );
+                        restApi.removeFolder( mFolder.getId() );
                     }
                     mFolderNeedsToUpdate = false;
                     finish();
@@ -566,22 +566,22 @@ public class FolderActivity extends SyncthingActivity
             }
             if ( targetPath == null || TextUtils.isEmpty( targetPath ) || ( targetPath.equals( File.separator ) ) )
             {
-                mFolder.path = "";
+                mFolder.setPath( "" );
                 mFolderUri = null;
                 checkWriteAndUpdateUI();
                 // Show message to the user suggesting to select a folder on internal or external storage.
                 Toast.makeText( this, R.string.toast_invalid_folder_selected, Toast.LENGTH_LONG ).show();
                 return;
             }
-            mFolder.path = FileUtils.cutTrailingSlash( targetPath );
-            Log.v( TAG, "onActivityResult/CHOOSE_FOLDER_REQUEST: Got directory path '" + mFolder.path + "'" );
+            mFolder.setPath( FileUtils.cutTrailingSlash( targetPath ) );
+            Log.v( TAG, "onActivityResult/CHOOSE_FOLDER_REQUEST: Got directory path '" + mFolder.getPath() + "'" );
             checkWriteAndUpdateUI();
             // Postpone sending the config changes using syncthing REST API.
             mFolderNeedsToUpdate = true;
         }
         else if ( resultCode == Activity.RESULT_OK && requestCode == FolderPickerActivity.DIRECTORY_REQUEST_CODE )
         {
-            mFolder.path = data.getStringExtra( FolderPickerActivity.EXTRA_RESULT_DIRECTORY );
+            mFolder.setPath( data.getStringExtra( FolderPickerActivity.EXTRA_RESULT_DIRECTORY ) );
             checkWriteAndUpdateUI();
             // Postpone sending the config changes using syncthing REST API.
             mFolderNeedsToUpdate = true;
@@ -592,13 +592,13 @@ public class FolderActivity extends SyncthingActivity
         }
         else if ( resultCode == Activity.RESULT_OK && requestCode == FOLDER_TYPE_DIALOG_REQUEST )
         {
-            mFolder.type = data.getStringExtra( FolderTypeDialogActivity.EXTRA_RESULT_FOLDER_TYPE );
+            mFolder.setType( data.getStringExtra( FolderTypeDialogActivity.EXTRA_RESULT_FOLDER_TYPE ) );
             updateFolderTypeDescription();
             mFolderNeedsToUpdate = true;
         }
         else if ( resultCode == Activity.RESULT_OK && requestCode == PULL_ORDER_DIALOG_REQUEST )
         {
-            mFolder.order = data.getStringExtra( PullOrderDialogActivity.EXTRA_RESULT_PULL_ORDER );
+            mFolder.setOrder( data.getStringExtra( PullOrderDialogActivity.EXTRA_RESULT_PULL_ORDER ) );
             updatePullOrderDescription();
             mFolderNeedsToUpdate = true;
         }
@@ -609,8 +609,8 @@ public class FolderActivity extends SyncthingActivity
      */
     private void checkWriteAndUpdateUI()
     {
-        binding.directoryTextView.setText( mFolder.path );
-        if ( TextUtils.isEmpty( mFolder.path ) )
+        binding.directoryTextView.setText( mFolder.getPath() );
+        if ( TextUtils.isEmpty( mFolder.getPath() ) )
         {
             return;
         }
@@ -620,7 +620,7 @@ public class FolderActivity extends SyncthingActivity
          * Access level readonly: folder can only be configured "sendonly".
          * Access level readwrite: folder can be configured "sendonly" or "sendreceive".
          */
-        mCanWriteToPath = Util.nativeBinaryCanWriteToPath( FolderActivity.this, mFolder.path );
+        mCanWriteToPath = Util.nativeBinaryCanWriteToPath( FolderActivity.this, mFolder.getPath() );
         if ( mCanWriteToPath )
         {
             binding.accessExplanationView.setText( R.string.folder_path_readwrite );
@@ -634,7 +634,7 @@ public class FolderActivity extends SyncthingActivity
                  * "[storage]/Android/data/com.nutomic.syncthingandroid/files"
                  * or enabled root mode thus having write access.
                  */
-                mFolder.type = Constants.FOLDER_TYPE_SEND_RECEIVE;
+                mFolder.setType( Constants.FOLDER_TYPE_SEND_RECEIVE );
                 updateFolderTypeDescription();
             }
         }
@@ -644,7 +644,7 @@ public class FolderActivity extends SyncthingActivity
             binding.accessExplanationView.setText( R.string.folder_path_readonly );
             binding.folderType.setEnabled( false );
             binding.editIgnores.setEnabled( false );
-            mFolder.type = Constants.FOLDER_TYPE_SEND_ONLY;
+            mFolder.setType( Constants.FOLDER_TYPE_SEND_ONLY );
             updateFolderTypeDescription();
         }
     }
@@ -670,21 +670,18 @@ public class FolderActivity extends SyncthingActivity
 
     private void initFolder()
     {
-        mFolder = new Folder();
-        mFolder.id = ( getIntent().hasExtra( EXTRA_FOLDER_ID ) )
+        String id = ( getIntent().hasExtra( EXTRA_FOLDER_ID ) )
                 ? getIntent().getStringExtra( EXTRA_FOLDER_ID )
                 : generateRandomFolderId();
-        mFolder.label = getIntent().getStringExtra( EXTRA_FOLDER_LABEL );
-        mFolder.fsWatcherEnabled = true;
-        mFolder.fsWatcherDelayS = 10;
+        String label = getIntent().getStringExtra( EXTRA_FOLDER_LABEL );
         /*
          * Folder rescan interval defaults to 3600s as it is the default in
          * syncthing when the file watcher is enabled and a new folder is created.
          */
-        mFolder.rescanIntervalS = 3600;
-        mFolder.paused = false;
-        mFolder.type = Constants.FOLDER_TYPE_SEND_RECEIVE;
-        mFolder.versioning = new Folder.Versioning();
+        int rescanIntervalS = 3600;
+        boolean paused = false;
+        Folder.Versioning versioning = new Folder.Versioning();
+        mFolder = new Folder( id, label, rescanIntervalS, paused, versioning );
     }
 
     private void addEmptyDeviceListView()
@@ -706,7 +703,7 @@ public class FolderActivity extends SyncthingActivity
         inflater.inflate( R.layout.item_device_form, binding.devicesContainer );
         MaterialSwitch deviceView = ( MaterialSwitch ) binding.devicesContainer.getChildAt( binding.devicesContainer.getChildCount() - 1 );
         deviceView.setOnCheckedChangeListener( null );
-        deviceView.setChecked( mFolder.getDevice( device.deviceID ) != null );
+        deviceView.setChecked( mFolder.getDevice( device.getDeviceID() ) != null );
         deviceView.setText( device.getDisplayName() );
         deviceView.setTag( device );
         deviceView.setOnCheckedChangeListener( mCheckedListener );
@@ -756,7 +753,7 @@ public class FolderActivity extends SyncthingActivity
     {
         if ( mFolder != null )
         {
-            mVersioning = mFolder.versioning;
+            mVersioning = mFolder.getVersioning();
         }
         else
         {
@@ -792,7 +789,7 @@ public class FolderActivity extends SyncthingActivity
             return;
         }
 
-        switch ( mFolder.type )
+        switch ( mFolder.getType() )
         {
             case Constants.FOLDER_TYPE_SEND_RECEIVE:
                 setFolderTypeDescription( getString( R.string.folder_type_sendreceive ),
@@ -822,14 +819,14 @@ public class FolderActivity extends SyncthingActivity
             return;
         }
 
-        if ( TextUtils.isEmpty( mFolder.order ) )
+        if ( TextUtils.isEmpty( mFolder.getOrder() ) )
         {
             setPullOrderDescription( getString( R.string.pull_order_type_random ),
                     getString( R.string.pull_order_type_random_description ) );
             return;
         }
 
-        switch ( mFolder.order )
+        switch ( mFolder.getOrder() )
         {
             case "random":
                 setPullOrderDescription( getString( R.string.pull_order_type_random ),
@@ -871,30 +868,30 @@ public class FolderActivity extends SyncthingActivity
             return;
         }
 
-        if ( TextUtils.isEmpty( mFolder.versioning.type ) )
+        if ( TextUtils.isEmpty( mFolder.getVersioning().type ) )
         {
             setVersioningDescription( getString( R.string.none ), "" );
             return;
         }
 
-        switch ( mFolder.versioning.type )
+        switch ( mFolder.getVersioning().type )
         {
             case "simple":
                 setVersioningDescription( getString( R.string.type_simple ),
-                        getString( R.string.simple_versioning_info, mFolder.versioning.params.get( "keep" ) ) );
+                        getString( R.string.simple_versioning_info, mFolder.getVersioning().params.get( "keep" ) ) );
                 break;
             case "trashcan":
                 setVersioningDescription( getString( R.string.type_trashcan ),
-                        getString( R.string.trashcan_versioning_info, mFolder.versioning.params.get( "cleanoutDays" ) ) );
+                        getString( R.string.trashcan_versioning_info, mFolder.getVersioning().params.get( "cleanoutDays" ) ) );
                 break;
             case "staggered":
-                int maxAge = ( int ) TimeUnit.SECONDS.toDays( Long.parseLong( Objects.requireNonNull( mFolder.versioning.params.get( "maxAge" ) ) ) );
+                int maxAge = ( int ) TimeUnit.SECONDS.toDays( Long.parseLong( Objects.requireNonNull( mFolder.getVersioning().params.get( "maxAge" ) ) ) );
                 setVersioningDescription( getString( R.string.type_staggered ),
-                        getString( R.string.staggered_versioning_info, maxAge, mFolder.versioning.params.get( "versionsPath" ) ) );
+                        getString( R.string.staggered_versioning_info, maxAge, mFolder.getVersioning().params.get( "versionsPath" ) ) );
                 break;
             case "external":
                 setVersioningDescription( getString( R.string.type_external ),
-                        getString( R.string.external_versioning_info, mFolder.versioning.params.get( "command" ) ) );
+                        getString( R.string.external_versioning_info, mFolder.getVersioning().params.get( "command" ) ) );
                 break;
         }
     }

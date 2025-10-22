@@ -114,12 +114,12 @@ public class EventProcessor implements Runnable, RestApi.OnReceiveEventListener
         Map< String, Object > mapData = null;
         try
         {
-            mapData = ( Map< String, Object > ) event.data;
+            mapData = ( Map< String, Object > ) event.getData();
         }
         catch ( ClassCastException ignored )
         {
         }
-        switch ( event.type )
+        switch ( event.getType() )
         {
             case "ConfigSaved":
                 if ( mApi != null )
@@ -133,7 +133,7 @@ public class EventProcessor implements Runnable, RestApi.OnReceiveEventListener
                 break;
             case "FolderCompletion":
                 CompletionInfo completionInfo = new CompletionInfo();
-                completionInfo.completion = ( Double ) mapData.get( "completion" );
+                completionInfo.setCompletion( Double.parseDouble( Objects.requireNonNull( mapData.get( "completion" ) ).toString() ) );
                 mApi.setCompletionInfo(
                         ( String ) mapData.get( "device" ),          // deviceId
                         ( String ) mapData.get( "folder" ),          // folderId
@@ -148,9 +148,9 @@ public class EventProcessor implements Runnable, RestApi.OnReceiveEventListener
                 String folderPath = null;
                 for ( Folder f : mApi.getFolders() )
                 {
-                    if ( f.id.equals( folder ) )
+                    if ( f.getId().equals( folder ) )
                     {
-                        folderPath = f.path;
+                        folderPath = f.getPath();
                     }
                 }
                 File updatedFile = new File( folderPath, ( String ) Objects.requireNonNull( mapData.get( "item" ) ) );
@@ -203,11 +203,11 @@ public class EventProcessor implements Runnable, RestApi.OnReceiveEventListener
             case "StateChanged":
                 if ( BuildConfig.DEBUG )
                 {
-                    Log.v( TAG, "Ignored event " + event.type + ", data " + event.data );
+                    Log.v( TAG, "Ignored event " + event.getType() + ", data " + event.getData() );
                 }
                 break;
             default:
-                Log.v( TAG, "Unhandled event " + event.type );
+                Log.v( TAG, "Unhandled event " + event.getType() );
         }
     }
 
@@ -311,7 +311,7 @@ public class EventProcessor implements Runnable, RestApi.OnReceiveEventListener
         String deviceName = null;
         for ( Device d : mApi.getDevices( false ) )
         {
-            if ( d.deviceID.equals( deviceId ) )
+            if ( d.getDeviceID().equals( deviceId ) )
             {
                 deviceName = d.getDisplayName();
                 break;
@@ -324,7 +324,7 @@ public class EventProcessor implements Runnable, RestApi.OnReceiveEventListener
 
         // Prepare "accept" action.
         boolean isNewFolder = Stream.of( mApi.getFolders() )
-                .noneMatch( f -> f.id.equals( folderId ) );
+                .noneMatch( f -> f.getId().equals( folderId ) );
         Intent intentAccept = new Intent( mContext, FolderActivity.class )
                 .putExtra( FolderActivity.EXTRA_NOTIFICATION_ID, notificationId )
                 .putExtra( FolderActivity.EXTRA_IS_CREATE, isNewFolder )

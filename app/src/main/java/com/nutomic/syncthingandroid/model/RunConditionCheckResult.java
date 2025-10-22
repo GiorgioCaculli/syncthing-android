@@ -12,6 +12,12 @@ public class RunConditionCheckResult
     private final boolean mShouldRun;
     private final List< BlockerReason > mBlockReasons;
 
+    public RunConditionCheckResult( List< BlockerReason > blockReasons )
+    {
+        mBlockReasons = Collections.unmodifiableList( blockReasons );
+        mShouldRun = blockReasons.isEmpty();
+    }
+
     /**
      * Use SHOULD_RUN instead.
      * Note: of course anybody could still construct it by providing an empty list to the other
@@ -20,12 +26,6 @@ public class RunConditionCheckResult
     private RunConditionCheckResult()
     {
         this( Collections.emptyList() );
-    }
-
-    public RunConditionCheckResult( List< BlockerReason > blockReasons )
-    {
-        mBlockReasons = Collections.unmodifiableList( blockReasons );
-        mShouldRun = blockReasons.isEmpty();
     }
 
     public List< BlockerReason > getBlockReasons()

@@ -123,7 +123,7 @@ public class FolderListFragment extends ListFragment implements SyncthingService
     {
         Intent intent = new Intent( getActivity(), FolderActivity.class )
                 .putExtra( FolderActivity.EXTRA_IS_CREATE, false )
-                .putExtra( FolderActivity.EXTRA_FOLDER_ID, Objects.requireNonNull( mAdapter.getItem( i ) ).id );
+                .putExtra( FolderActivity.EXTRA_FOLDER_ID, Objects.requireNonNull( mAdapter.getItem( i ) ).getId() );
         startActivity( intent );
     }
 

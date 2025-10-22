@@ -35,7 +35,7 @@ public class DeviceListFragment extends ListFragment implements SyncthingService
         ListView.OnItemClickListener
 {
 
-    private final static Comparator< Device > DEVICES_COMPARATOR = ( lhs, rhs ) -> lhs.name.compareTo( rhs.name );
+    private final static Comparator< Device > DEVICES_COMPARATOR = ( lhs, rhs ) -> lhs.getName().compareTo( rhs.getName() );
 
     private DevicesAdapter mAdapter;
 
@@ -129,7 +129,7 @@ public class DeviceListFragment extends ListFragment implements SyncthingService
     {
         Intent intent = new Intent( getActivity(), DeviceActivity.class );
         intent.putExtra( DeviceActivity.EXTRA_IS_CREATE, false );
-        intent.putExtra( DeviceActivity.EXTRA_DEVICE_ID, Objects.requireNonNull( mAdapter.getItem( i ) ).deviceID );
+        intent.putExtra( DeviceActivity.EXTRA_DEVICE_ID, Objects.requireNonNull( mAdapter.getItem( i ) ).getDeviceID() );
         startActivity( intent );
     }
 

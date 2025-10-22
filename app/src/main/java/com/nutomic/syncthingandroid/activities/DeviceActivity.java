@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 import com.google.gson.Gson;
@@ -78,11 +79,11 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
             dialog.dismiss();
             Compression compression = Compression.fromIndex( which );
             // Don't pop the restart dialog unless the value is actually different.
-            if ( compression != Compression.fromValue( DeviceActivity.this, mDevice.compression ) )
+            if ( compression != Compression.fromValue( DeviceActivity.this, mDevice.getCompression() ) )
             {
                 mDeviceNeedsToUpdate = true;
 
-                mDevice.compression = compression.getValue( DeviceActivity.this );
+                mDevice.setCompression( compression.getValue( DeviceActivity.this ) );
                 binding.compressionValue.setText( compression.getTitle( DeviceActivity.this ) );
             }
         }
@@ -92,10 +93,10 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
         @Override
         public void afterTextChanged( Editable s )
         {
-            if ( !s.toString().equals( mDevice.deviceID ) )
+            if ( !s.toString().equals( mDevice.getDeviceID() ) )
             {
                 mDeviceNeedsToUpdate = true;
-                mDevice.deviceID = s.toString();
+                mDevice.setDeviceID( s.toString() );
             }
         }
     };
@@ -104,10 +105,10 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
         @Override
         public void afterTextChanged( Editable s )
         {
-            if ( !s.toString().equals( mDevice.name ) )
+            if ( !s.toString().equals( mDevice.getName() ) )
             {
                 mDeviceNeedsToUpdate = true;
-                mDevice.name = s.toString();
+                mDevice.setName( s.toString() );
             }
         }
     };
@@ -119,7 +120,7 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
             if ( !s.toString().equals( displayableAddresses() ) )
             {
                 mDeviceNeedsToUpdate = true;
-                mDevice.addresses = persistableAddresses( s );
+                mDevice.setAddresses( persistableAddresses( s ) );
             }
         }
     };
@@ -132,11 +133,11 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
                     switch ( view.getId() )
                     {
                         case R.id.introducer:
-                            mDevice.introducer = isChecked;
+                            mDevice.setIntroducer( isChecked );
                             mDeviceNeedsToUpdate = true;
                             break;
                         case R.id.devicePause:
-                            mDevice.paused = isChecked;
+                            mDevice.setPaused( isChecked );
                             mDeviceNeedsToUpdate = true;
                             break;
                     }
@@ -234,7 +235,7 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
      * Save current settings in case we are in create mode and they aren't yet stored in the config.
      */
     @Override
-    public void onSaveInstanceState( Bundle outState )
+    public void onSaveInstanceState( @NonNull Bundle outState )
     {
         super.onSaveInstanceState( outState );
         outState.putString( "device", new Gson().toJson( mDevice ) );
@@ -268,12 +269,12 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
     private void onReceiveConnections( Connections connections )
     {
         boolean viewsExist = binding.syncthingVersion != null && binding.currentAddress != null;
-        if ( viewsExist && connections.connections.containsKey( mDevice.deviceID ) )
+        if ( viewsExist && connections.connections.containsKey( mDevice.getDeviceID() ) )
         {
             binding.currentAddress.setVisibility( VISIBLE );
             binding.syncthingVersion.setVisibility( VISIBLE );
-            binding.currentAddress.setText( connections.connections.get( mDevice.deviceID ).address );
-            binding.syncthingVersion.setText( connections.connections.get( mDevice.deviceID ).clientVersion );
+            binding.currentAddress.setText( connections.connections.get( mDevice.getDeviceID() ).address );
+            binding.syncthingVersion.setText( connections.connections.get( mDevice.getDeviceID() ).clientVersion );
         }
     }
 
@@ -291,7 +292,7 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
             mDevice = null;
             for ( Device device : devices )
             {
-                if ( device.deviceID.equals( getIntent().getStringExtra( EXTRA_DEVICE_ID ) ) )
+                if ( device.getDeviceID().equals( getIntent().getStringExtra( EXTRA_DEVICE_ID ) ) )
                 {
                     mDevice = device;
                     break;
@@ -319,12 +320,12 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
         binding.devicePause.setOnCheckedChangeListener( null );
 
         // Update views
-        binding.id.setText( mDevice.deviceID );
-        binding.name.setText( mDevice.name );
+        binding.id.setText( mDevice.getDeviceID() );
+        binding.name.setText( mDevice.getName() );
         binding.addresses.setText( displayableAddresses() );
-        binding.compressionValue.setText( Compression.fromValue( this, mDevice.compression ).getTitle( this ) );
-        binding.introducer.setChecked( mDevice.introducer );
-        binding.devicePause.setChecked( mDevice.paused );
+        binding.compressionValue.setText( Compression.fromValue( this, mDevice.getCompression() ).getTitle( this ) );
+        binding.introducer.setChecked( mDevice.isIntroducer() );
+        binding.devicePause.setChecked( mDevice.isPaused() );
 
         // Keep state updated
         binding.id.addTextChangedListener( mIdTextWatcher );
@@ -356,7 +357,7 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
         switch ( item.getItemId() )
         {
             case R.id.create:
-                if ( isEmpty( mDevice.deviceID ) )
+                if ( isEmpty( mDevice.getDeviceID() ) )
                 {
                     Toast.makeText( this, R.string.device_id_required, Toast.LENGTH_LONG )
                             .show();
@@ -367,7 +368,7 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
                 finish();
                 return true;
             case R.id.share_device_id:
-                shareDeviceId( this, mDevice.deviceID );
+                shareDeviceId( this, mDevice.getDeviceID() );
                 return true;
             case R.id.remove:
                 showDeleteDialog();
@@ -393,7 +394,7 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
                 .setMessage( R.string.remove_device_confirm )
                 .setPositiveButton( android.R.string.yes, ( dialogInterface, i ) ->
                 {
-                    getApi().removeDevice( mDevice.deviceID );
+                    getApi().removeDevice( mDevice.getDeviceID() );
                     finish();
                 } )
                 .setNegativeButton( android.R.string.no, null )
@@ -415,8 +416,8 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
                 String scanResult = intent.getStringExtra( QRScannerActivity.QR_RESULT_ARG );
                 if ( scanResult != null )
                 {
-                    mDevice.deviceID = scanResult;
-                    binding.id.setText( mDevice.deviceID );
+                    mDevice.setDeviceID( scanResult );
+                    binding.id.setText( mDevice.getDeviceID() );
                 }
             }
         }
@@ -424,13 +425,13 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
 
     private void initDevice()
     {
-        mDevice = new Device();
-        mDevice.name = getIntent().getStringExtra( EXTRA_DEVICE_NAME );
-        mDevice.deviceID = getIntent().getStringExtra( EXTRA_DEVICE_ID );
-        mDevice.addresses = DYNAMIC_ADDRESS;
-        mDevice.compression = METADATA.getValue( this );
-        mDevice.introducer = false;
-        mDevice.paused = false;
+        String deviceID = getIntent().getStringExtra( EXTRA_DEVICE_ID );
+        String name = getIntent().getStringExtra( EXTRA_DEVICE_NAME );
+        mDevice = new Device( deviceID, name );
+        mDevice.setAddresses( DYNAMIC_ADDRESS );
+        mDevice.setCompression( METADATA.getValue( this ) );
+        mDevice.setIntroducer( false );
+        mDevice.setPaused( false );
     }
 
     private void prepareEditMode()
@@ -465,9 +466,9 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
 
     private String displayableAddresses()
     {
-        List< String > list = DYNAMIC_ADDRESS.equals( mDevice.addresses )
+        List< String > list = DYNAMIC_ADDRESS.equals( mDevice.getAddresses() )
                 ? DYNAMIC_ADDRESS
-                : mDevice.addresses;
+                : mDevice.getAddresses();
         return TextUtils.join( " ", list );
     }
 
@@ -485,7 +486,7 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
         }
         else if ( v.equals( binding.idContainer ) )
         {
-            Util.copyDeviceId( this, mDevice.deviceID );
+            Util.copyDeviceId( this, mDevice.getDeviceID() );
         }
     }
 
@@ -500,7 +501,7 @@ public class DeviceActivity extends SyncthingActivity implements View.OnClickLis
         return Util.getAlertDialogBuilder( this )
                 .setTitle( R.string.compression )
                 .setSingleChoiceItems( R.array.compress_entries,
-                        Compression.fromValue( this, mDevice.compression ).getIndex(),
+                        Compression.fromValue( this, mDevice.getCompression() ).getIndex(),
                         mCompressionEntrySelectedListener )
                 .create();
     }

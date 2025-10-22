@@ -50,7 +50,7 @@ public class DevicesAdapter extends ArrayAdapter< Device >
         TextView download = convertView.findViewById( R.id.download );
         TextView upload = convertView.findViewById( R.id.upload );
 
-        String deviceId = Objects.requireNonNull( getItem( position ) ).deviceID;
+        String deviceId = Objects.requireNonNull( getItem( position ) ).getDeviceID();
 
         name.setText( Objects.requireNonNull( getItem( position ) ).getDisplayName() );
         Resources r = getContext().getResources();

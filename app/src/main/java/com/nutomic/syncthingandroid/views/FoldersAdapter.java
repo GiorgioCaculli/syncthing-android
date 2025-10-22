@@ -92,21 +92,21 @@ public class FoldersAdapter extends ArrayAdapter< Folder >
         Folder folder = getItem( position );
         assert folder != null;
         assert binding != null;
-        binding.label.setText( TextUtils.isEmpty( folder.label ) ? folder.id : folder.label );
-        binding.directory.setText( folder.path );
+        binding.label.setText( TextUtils.isEmpty( folder.getLabel() ) ? folder.getId() : folder.getLabel() );
+        binding.directory.setText( folder.getPath() );
         binding.override.setOnClickListener( v ->
         {
             // Send "Override changes" through our service to the REST API.
             Intent intent = new Intent( mContext, SyncthingService.class )
-                    .putExtra( SyncthingService.EXTRA_FOLDER_ID, folder.id );
+                    .putExtra( SyncthingService.EXTRA_FOLDER_ID, folder.getId() );
             intent.setAction( SyncthingService.ACTION_OVERRIDE_CHANGES );
             mContext.startService( intent );
         } );
         binding.openFolder.setOnClickListener( v ->
         {
             Intent intent = new Intent( Intent.ACTION_VIEW );
-            intent.setDataAndType( Uri.fromFile( new File( folder.path ) ), "resource/folder" );
-            intent.putExtra( "org.openintents.extra.ABSOLUTE_PATH", folder.path );
+            intent.setDataAndType( Uri.fromFile( new File( folder.getPath() ) ), "resource/folder" );
+            intent.putExtra( "org.openintents.extra.ABSOLUTE_PATH", folder.getPath() );
             intent.addFlags( Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK );
             if ( intent.resolveActivity( mContext.getPackageManager() ) != null )
             {
@@ -116,7 +116,7 @@ public class FoldersAdapter extends ArrayAdapter< Folder >
             {
                 // Try a second way to find a compatible file explorer app.
                 Log.v( TAG, "openFolder: Fallback to application chooser to open folder." );
-                intent.setDataAndType( Uri.parse( folder.path ), "application/*" );
+                intent.setDataAndType( Uri.parse( folder.getPath() ), "application/*" );
                 Intent chooserIntent = Intent.createChooser( intent, mContext.getString( R.string.open_file_manager ) );
                 if ( chooserIntent != null )
                 {
@@ -135,19 +135,19 @@ public class FoldersAdapter extends ArrayAdapter< Folder >
 
     private void updateFolderStatusView( ItemFolderListBinding binding, Folder folder )
     {
-        FolderStatus folderStatus = mLocalFolderStatuses.get( folder.id );
+        FolderStatus folderStatus = mLocalFolderStatuses.get( folder.getId() );
         if ( folderStatus == null )
         {
             binding.items.setVisibility( GONE );
             binding.override.setVisibility( GONE );
             binding.size.setVisibility( GONE );
-            setTextOrHide( binding.invalid, folder.invalid );
+            setTextOrHide( binding.invalid, folder.getInvalid() );
             return;
         }
 
         long neededItems = folderStatus.needFiles + folderStatus.needDirectories + folderStatus.needSymlinks + folderStatus.needDeletes;
         boolean outOfSync = folderStatus.state.equals( "idle" ) && neededItems > 0;
-        boolean overrideButtonVisible = folder.type.equals( Constants.FOLDER_TYPE_SEND_ONLY ) && outOfSync;
+        boolean overrideButtonVisible = folder.getType().equals( Constants.FOLDER_TYPE_SEND_ONLY ) && outOfSync;
         binding.override.setVisibility( overrideButtonVisible ? VISIBLE : GONE );
         if ( outOfSync )
         {
@@ -156,7 +156,7 @@ public class FoldersAdapter extends ArrayAdapter< Folder >
         }
         else
         {
-            if ( folder.paused )
+            if ( folder.isPaused() )
             {
                 binding.state.setText( mContext.getString( R.string.state_paused ) );
                 binding.state.setTextColor( MaterialColors.getColor( mContext, android.R.attr.textColorPrimary, Color.BLACK ) );
@@ -198,7 +198,7 @@ public class FoldersAdapter extends ArrayAdapter< Folder >
               i < getCount();
               i++ )
         {
-            api.getFolderStatus( Objects.requireNonNull( getItem( i ) ).id, this::onReceiveFolderStatus );
+            api.getFolderStatus( Objects.requireNonNull( getItem( i ) ).getId(), this::onReceiveFolderStatus );
         }
     }
 

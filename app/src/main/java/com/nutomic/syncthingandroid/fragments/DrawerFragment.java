@@ -35,7 +35,6 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -202,16 +201,16 @@ public class DrawerFragment extends Fragment implements View.OnClickListener
         }
         NumberFormat percentFormat = NumberFormat.getPercentInstance();
         percentFormat.setMaximumFractionDigits( 2 );
-        mRamUsage.setText( Util.readableFileSize( mActivity, info.sys ) );
-        int announceTotal = info.discoveryMethods;
+        mRamUsage.setText( Util.readableFileSize( mActivity, info.sys() ) );
+        int announceTotal = info.discoveryMethods();
         int announceConnected =
-                announceTotal - Optional.fromNullable( info.discoveryErrors ).transform( Map::size ).or( 0 );
+                announceTotal - Optional.fromNullable( info.discoveryErrors() ).transform( Map::size ).or( 0 );
         mAnnounceServer.setText( String.format( Locale.getDefault(), "%1$d/%2$d",
                 announceConnected, announceTotal ) );
         int color = ( announceConnected > 0 )
                 ? R.color.text_green
                 : R.color.text_red;
-        mAnnounceServer.setTextColor( ContextCompat.getColor( Objects.requireNonNull( getContext() ), color ) );
+        mAnnounceServer.setTextColor( ContextCompat.getColor( requireContext(), color ) );
     }
 
     /**
@@ -224,7 +223,7 @@ public class DrawerFragment extends Fragment implements View.OnClickListener
             return;
         }
 
-        mVersion.setText( info.version );
+        mVersion.setText( info.version() );
     }
 
     /**
@@ -251,8 +250,8 @@ public class DrawerFragment extends Fragment implements View.OnClickListener
         }
         try
         {
-            String apiKey = restApi.getGui().apiKey;
-            String deviceId = restApi.getLocalDevice().deviceID;
+            String apiKey = restApi.getGui().getApiKey();
+            String deviceId = restApi.getLocalDevice().getDeviceID();
             URL url = restApi.getUrl();
             //The QRCode request takes one paramteer called "text", which is the text to be converted to a QRCode.
             new ImageGetRequest( mActivity, url, ImageGetRequest.QR_CODE_GENERATOR, apiKey,

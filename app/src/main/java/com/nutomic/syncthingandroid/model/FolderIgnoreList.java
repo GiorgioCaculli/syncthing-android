@@ -6,6 +6,17 @@ package com.nutomic.syncthingandroid.model;
  */
 public class FolderIgnoreList
 {
-    public String[] expanded;
-    public String[] ignore;
+    private final String[] expanded;
+    private final String[] ignore;
+
+    public FolderIgnoreList( String[] expanded, String[] ignore )
+    {
+        this.expanded = expanded;
+        this.ignore = ignore;
+    }
+
+    public FolderIgnoreList()
+    {
+        this( new String[]{}, new String[]{} );
+    }
 }

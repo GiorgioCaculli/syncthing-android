@@ -380,7 +380,7 @@ public class SettingsActivity extends SyncthingActivity
             mGui = mApi.getGui();
 
             Joiner joiner = Joiner.on( ", " );
-            mDeviceName.setText( mApi.getLocalDevice().name );
+            mDeviceName.setText( mApi.getLocalDevice().getName() );
             mListenAddresses.setText( joiner.join( mOptions.listenAddresses ) );
             mMaxRecvKbps.setText( Integer.toString( mOptions.maxRecvKbps ) );
             mMaxSendKbps.setText( Integer.toString( mOptions.maxSendKbps ) );
@@ -389,9 +389,9 @@ public class SettingsActivity extends SyncthingActivity
             mGlobalAnnounceEnabled.setChecked( mOptions.globalAnnounceEnabled );
             mRelaysEnabled.setChecked( mOptions.relaysEnabled );
             mGlobalAnnounceServers.setText( joiner.join( mOptions.globalAnnounceServers ) );
-            mAddress.setText( mGui.address );
+            mAddress.setText( mGui.getAddress() );
             mApi.getSystemInfo( systemInfo ->
-                    mUrAccepted.setChecked( mOptions.isUsageReportingAccepted( systemInfo.urVersionMax ) ) );
+                    mUrAccepted.setChecked( mOptions.isUsageReportingAccepted( systemInfo.urVersionMax() ) ) );
         }
 
         @Override
@@ -462,7 +462,7 @@ public class SettingsActivity extends SyncthingActivity
             {
                 case "deviceName":
                     Device localDevice = mApi.getLocalDevice();
-                    localDevice.name = ( String ) o;
+                    localDevice.setName( ( String ) o );
                     mApi.editDevice( localDevice );
                     break;
                 case "listenAddresses":
@@ -512,13 +512,13 @@ public class SettingsActivity extends SyncthingActivity
                     mOptions.globalAnnounceServers = Iterables.toArray( splitter.split( ( String ) o ), String.class );
                     break;
                 case "address":
-                    mGui.address = ( String ) o;
+                    mGui.setAddress( ( String ) o );
                     break;
                 case "urAccepted":
                     mApi.getSystemInfo( systemInfo ->
                     {
                         mOptions.urAccepted = ( ( boolean ) o )
-                                ? systemInfo.urVersionMax
+                                ? systemInfo.urVersionMax()
                                 : Options.USAGE_REPORTING_DENIED;
                     } );
                     break;

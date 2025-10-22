@@ -78,7 +78,7 @@ public class ShareActivity extends StateDialogActivity
         String savedFolderId = mPreferences.getString( PREF_PREVIOUSLY_SELECTED_SYNCTHING_FOLDER, "" );
         for ( Folder folder : folders )
         {
-            if ( folder.id.equals( savedFolderId ) )
+            if ( folder.getId().equals( savedFolderId ) )
             {
                 folderIndex = folders.indexOf( folder );
                 break;
@@ -174,7 +174,7 @@ public class ShareActivity extends StateDialogActivity
                 files.entrySet().iterator().next().setValue( binding.name.getText().toString() );
             }
             Folder folder = ( Folder ) mFoldersSpinner.getSelectedItem();
-            File directory = new File( folder.path, getSavedSubDirectory() );
+            File directory = new File( folder.getPath(), getSavedSubDirectory() );
             CopyFilesTask mCopyFilesTask = new CopyFilesTask( this, files, folder, directory );
             mCopyFilesTask.execute();
         } );
@@ -197,9 +197,9 @@ public class ShareActivity extends StateDialogActivity
         binding.browseButton.setOnClickListener( view ->
         {
             Folder folder = ( Folder ) mFoldersSpinner.getSelectedItem();
-            File initialDirectory = new File( folder.path, getSavedSubDirectory() );
+            File initialDirectory = new File( folder.getPath(), getSavedSubDirectory() );
             startActivityForResult( FolderPickerActivity.createIntent( getApplicationContext(),
-                            initialDirectory.getAbsolutePath(), folder.path ),
+                            initialDirectory.getAbsolutePath(), folder.getPath() ),
                     FolderPickerActivity.DIRECTORY_REQUEST_CODE );
         } );
 
@@ -316,7 +316,7 @@ public class ShareActivity extends StateDialogActivity
 
         if ( selectedFolder != null )
         {
-            savedSubDirectory = mPreferences.getString( PREF_FOLDER_SAVED_SUBDIRECTORY + selectedFolder.id, "" );
+            savedSubDirectory = mPreferences.getString( PREF_FOLDER_SAVED_SUBDIRECTORY + selectedFolder.getId(), "" );
         }
 
         return savedSubDirectory;
@@ -330,7 +330,7 @@ public class ShareActivity extends StateDialogActivity
         {
             Folder selectedFolder = ( Folder ) mFoldersSpinner.getSelectedItem();
             mPreferences.edit()
-                    .putString( PREF_PREVIOUSLY_SELECTED_SYNCTHING_FOLDER, selectedFolder.id )
+                    .putString( PREF_PREVIOUSLY_SELECTED_SYNCTHING_FOLDER, selectedFolder.getId() )
                     .apply();
         }
     }
@@ -342,7 +342,7 @@ public class ShareActivity extends StateDialogActivity
         if ( requestCode == FolderPickerActivity.DIRECTORY_REQUEST_CODE && resultCode == RESULT_OK )
         {
             Folder selectedFolder = ( Folder ) mFoldersSpinner.getSelectedItem();
-            String folderDirectory = Util.formatPath( selectedFolder.path );
+            String folderDirectory = Util.formatPath( selectedFolder.getPath() );
             String subDirectory = data.getStringExtra( FolderPickerActivity.EXTRA_RESULT_DIRECTORY );
             //Remove the parent directory from the string, so it is only the Sub directory that is displayed to the user.
             assert subDirectory != null;
@@ -350,7 +350,7 @@ public class ShareActivity extends StateDialogActivity
             mSubDirectoryTextView.setText( subDirectory );
 
             mPreferences
-                    .edit().putString( PREF_FOLDER_SAVED_SUBDIRECTORY + selectedFolder.id, subDirectory )
+                    .edit().putString( PREF_FOLDER_SAVED_SUBDIRECTORY + selectedFolder.getId(), subDirectory )
                     .apply();
         }
     }
@@ -449,9 +449,9 @@ public class ShareActivity extends StateDialogActivity
             Util.dismissDialogSafe( mProgress, shareActivity );
             Toast.makeText( shareActivity, mIgnored > 0 ?
                             shareActivity.getResources().getQuantityString( R.plurals.copy_success_partially, mCopied,
-                                    mCopied, mFolder.label, mIgnored ) :
+                                    mCopied, mFolder.getLabel(), mIgnored ) :
                             shareActivity.getResources().getQuantityString( R.plurals.copy_success, mCopied, mCopied,
-                                    mFolder.label ),
+                                    mFolder.getLabel() ),
                     Toast.LENGTH_LONG ).show();
             if ( isError )
             {

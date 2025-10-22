@@ -17,6 +17,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.nutomic.syncthingandroid.BuildConfig;
 import com.nutomic.syncthingandroid.SyncthingApp;
+import com.nutomic.syncthingandroid.activities.FolderActivity;
 import com.nutomic.syncthingandroid.activities.ShareActivity;
 import com.nutomic.syncthingandroid.http.GetRequest;
 import com.nutomic.syncthingandroid.http.PostConfigRequest;
@@ -45,6 +46,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -64,21 +66,24 @@ public class RestApi
      */
     private final static Comparator< Folder > FOLDERS_COMPARATOR = ( lhs, rhs ) ->
     {
-        String lhsLabel = lhs.label != null && !lhs.label.isEmpty() ? lhs.label : lhs.id;
-        String rhsLabel = rhs.label != null && !rhs.label.isEmpty() ? rhs.label : rhs.id;
+        String lhsLabel = lhs.getLabel() != null && !lhs.getLabel().isEmpty() ? lhs.getLabel() : lhs.getId();
+        String rhsLabel = rhs.getLabel() != null && !rhs.getLabel().isEmpty() ? rhs.getLabel() : rhs.getId();
 
         return lhsLabel.compareTo( rhsLabel );
     };
 
     static
     {
+        /*
+        TODO: user's locale or generic locale?
+         */
         if ( android.os.Build.VERSION.SDK_INT < 24 )
         {
-            dateFormat = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss'Z'" );
+            dateFormat = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US );
         }
         else
         {
-            dateFormat = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssXXX" );
+            dateFormat = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US );
         }
     }
 
@@ -180,8 +185,8 @@ public class RestApi
         } );
         getSystemInfo( info ->
         {
-            mLocalDeviceId = info.myID;
-            mUrVersionMax = info.urVersionMax;
+            mLocalDeviceId = info.myID();
+            mUrVersionMax = info.urVersionMax();
             synchronized ( mAsyncQueryCompleteLock )
             {
                 asyncQuerySystemInfoComplete = true;
@@ -219,7 +224,7 @@ public class RestApi
         Log.v( TAG, "onReloadConfigComplete: Successfully parsed configuration." );
         if ( BuildConfig.DEBUG )
         {
-            Log.v( TAG, "mConfig.remoteIgnoredDevices = " + new Gson().toJson( mConfig.remoteIgnoredDevices ) );
+            Log.v( TAG, "mConfig.remoteIgnoredDevices = " + new Gson().toJson( mConfig.getRemoteIgnoredDevices() ) );
         }
 
         // Update cached device and folder information stored in the mCompletion model.
@@ -273,9 +278,9 @@ public class RestApi
         synchronized ( mConfigLock )
         {
             // Check if the device has already been ignored.
-            for ( RemoteIgnoredDevice remoteIgnoredDevice : mConfig.remoteIgnoredDevices )
+            for ( RemoteIgnoredDevice remoteIgnoredDevice : mConfig.getRemoteIgnoredDevices() )
             {
-                if ( deviceId.equals( remoteIgnoredDevice.deviceID ) )
+                if ( deviceId.equals( remoteIgnoredDevice.getDeviceID() ) )
                 {
                     // Device already ignored.
                     Log.d( TAG, "Device already ignored [" + deviceId + "]" );
@@ -283,12 +288,8 @@ public class RestApi
                 }
             }
 
-            RemoteIgnoredDevice remoteIgnoredDevice = new RemoteIgnoredDevice();
-            remoteIgnoredDevice.deviceID = deviceId;
-            remoteIgnoredDevice.address = deviceAddress;
-            remoteIgnoredDevice.name = deviceName;
-            remoteIgnoredDevice.time = dateFormat.format( new Date() );
-            mConfig.remoteIgnoredDevices.add( remoteIgnoredDevice );
+            RemoteIgnoredDevice remoteIgnoredDevice = new RemoteIgnoredDevice( deviceId, deviceAddress, deviceName, dateFormat.format( new Date() ) );
+            mConfig.addRemoteIgnoredDevice( remoteIgnoredDevice );
             sendConfig();
             Log.d( TAG, "Ignored device [" + deviceId + "]" );
         }
@@ -303,16 +304,16 @@ public class RestApi
     {
         synchronized ( mConfigLock )
         {
-            for ( Device device : mConfig.devices )
+            for ( Device device : mConfig.getDevices() )
             {
-                if ( deviceId.equals( device.deviceID ) )
+                if ( deviceId.equals( device.getDeviceID() ) )
                 {
                     /*
                      * Check if the folder has already been ignored.
                      */
-                    for ( IgnoredFolder ignoredFolder : device.ignoredFolders )
+                    for ( IgnoredFolder ignoredFolder : device.getIgnoredFolders() )
                     {
-                        if ( folderId.equals( ignoredFolder.id ) )
+                        if ( folderId.equals( ignoredFolder.getId() ) )
                         {
                             // Folder already ignored.
                             Log.d( TAG, "Folder [" + folderId + "] already ignored on device [" + deviceId + "]" );
@@ -324,14 +325,11 @@ public class RestApi
                      * Ignore folder by moving its corresponding "pendingFolder" entry to
                      * a newly created "ignoredFolder" entry.
                      */
-                    IgnoredFolder ignoredFolder = new IgnoredFolder();
-                    ignoredFolder.id = folderId;
-                    ignoredFolder.label = folderLabel;
-                    ignoredFolder.time = dateFormat.format( new Date() );
-                    device.ignoredFolders.add( ignoredFolder );
+                    IgnoredFolder ignoredFolder = new IgnoredFolder( folderId, folderLabel, dateFormat.format( new Date() ) );
+                    device.addIgnoredFolder( ignoredFolder );
                     if ( BuildConfig.DEBUG )
                     {
-                        Log.v( TAG, "device.ignoredFolders = " + new Gson().toJson( device.ignoredFolders ) );
+                        Log.v( TAG, "device.ignoredFolders = " + new Gson().toJson( device.getIgnoredFolders() ) );
                     }
                     sendConfig();
                     Log.d( TAG, "Ignored folder [" + folderId + "] announced by device [" + deviceId + "]" );
@@ -351,10 +349,10 @@ public class RestApi
         Log.d( TAG, "Undo ignoring devices and folders ..." );
         synchronized ( mConfigLock )
         {
-            mConfig.remoteIgnoredDevices.clear();
-            for ( Device device : mConfig.devices )
+            mConfig.getRemoteIgnoredDevices().clear();
+            for ( Device device : mConfig.getDevices() )
             {
-                device.ignoredFolders.clear();
+                device.getIgnoredFolders().clear();
             }
         }
     }
@@ -423,7 +421,7 @@ public class RestApi
         List< Folder > folders;
         synchronized ( mConfigLock )
         {
-            folders = deepCopy( mConfig.folders, new TypeToken< List< Folder > >()
+            folders = deepCopy( mConfig.getFolders(), new TypeToken< List< Folder > >()
             {
             }.getType() );
         }
@@ -439,7 +437,7 @@ public class RestApi
         synchronized ( mConfigLock )
         {
             // Add the new folder to the model.
-            mConfig.folders.add( folder );
+            mConfig.addFolder( folder );
             // Send model changes to syncthing, does not require a restart.
             sendConfig();
         }
@@ -449,8 +447,8 @@ public class RestApi
     {
         synchronized ( mConfigLock )
         {
-            removeFolderInternal( newFolder.id );
-            mConfig.folders.add( newFolder );
+            removeFolderInternal( newFolder.getId() );
+            mConfig.addFolder( newFolder );
             sendConfig();
         }
     }
@@ -473,11 +471,11 @@ public class RestApi
     {
         synchronized ( mConfigLock )
         {
-            Iterator< Folder > it = mConfig.folders.iterator();
+            Iterator< Folder > it = mConfig.getFolders().iterator();
             while ( it.hasNext() )
             {
                 Folder f = it.next();
-                if ( f.id.equals( id ) )
+                if ( f.getId().equals( id ) )
                 {
                     it.remove();
                     break;
@@ -496,7 +494,7 @@ public class RestApi
         List< Device > devices;
         synchronized ( mConfigLock )
         {
-            devices = deepCopy( mConfig.devices, new TypeToken< List< Device > >()
+            devices = deepCopy( mConfig.getDevices(), new TypeToken< List< Device > >()
             {
             }.getType() );
         }
@@ -505,7 +503,7 @@ public class RestApi
         while ( it.hasNext() )
         {
             Device device = it.next();
-            boolean isLocalDevice = Objects.equal( mLocalDeviceId, device.deviceID );
+            boolean isLocalDevice = Objects.equal( mLocalDeviceId, device.getDeviceID() );
             if ( !includeLocal && isLocalDevice )
             {
                 it.remove();
@@ -525,7 +523,7 @@ public class RestApi
         Log.v( TAG, "getLocalDevice: Looking for local device ID " + mLocalDeviceId );
         for ( Device d : devices )
         {
-            if ( d.deviceID.equals( mLocalDeviceId ) )
+            if ( d.getDeviceID().equals( mLocalDeviceId ) )
             {
                 return deepCopy( d, Device.class );
             }
@@ -535,11 +533,11 @@ public class RestApi
 
     public void addDevice( Device device, OnResultListener1< String > errorListener )
     {
-        normalizeDeviceId( device.deviceID, normalizedId ->
+        normalizeDeviceId( device.getDeviceID(), normalizedId ->
         {
             synchronized ( mConfigLock )
             {
-                mConfig.devices.add( device );
+                mConfig.addDevice( device );
                 sendConfig();
             }
         }, errorListener );
@@ -549,8 +547,8 @@ public class RestApi
     {
         synchronized ( mConfigLock )
         {
-            removeDeviceInternal( newDevice.deviceID );
-            mConfig.devices.add( newDevice );
+            removeDeviceInternal( newDevice.getDeviceID() );
+            mConfig.addDevice( newDevice );
             sendConfig();
         }
     }
@@ -569,11 +567,11 @@ public class RestApi
     {
         synchronized ( mConfigLock )
         {
-            Iterator< Device > it = mConfig.devices.iterator();
+            Iterator< Device > it = mConfig.getDevices().iterator();
             while ( it.hasNext() )
             {
                 Device d = it.next();
-                if ( d.deviceID.equals( deviceId ) )
+                if ( d.getDeviceID().equals( deviceId ) )
                 {
                     it.remove();
                     break;
@@ -586,7 +584,7 @@ public class RestApi
     {
         synchronized ( mConfigLock )
         {
-            return deepCopy( mConfig.options, Options.class );
+            return deepCopy( mConfig.getOptions(), Options.class );
         }
     }
 
@@ -594,7 +592,7 @@ public class RestApi
     {
         synchronized ( mConfigLock )
         {
-            return deepCopy( mConfig.gui, Config.Gui.class );
+            return deepCopy( mConfig.getGui(), Config.Gui.class );
         }
     }
 
@@ -602,8 +600,8 @@ public class RestApi
     {
         synchronized ( mConfigLock )
         {
-            mConfig.gui = newGui;
-            mConfig.options = newOptions;
+            mConfig.setGui( newGui );
+            mConfig.setOptions( newOptions );
         }
     }
 
@@ -718,9 +716,9 @@ public class RestApi
                 JsonElement json = jsonEvents.get( i );
                 Event event = new Gson().fromJson( json, Event.class );
 
-                if ( lastId < event.id )
+                if ( lastId < event.getId() )
                 {
-                    lastId = event.id;
+                    lastId = event.getId();
                 }
 
                 listener.onEvent( event );
@@ -801,7 +799,7 @@ public class RestApi
         options.urAccepted = acceptUsageReporting ? mUrVersionMax : Options.USAGE_REPORTING_DENIED;
         synchronized ( mConfigLock )
         {
-            mConfig.options = options;
+            mConfig.setOptions( options );
         }
     }
 
