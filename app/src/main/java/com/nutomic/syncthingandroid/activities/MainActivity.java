@@ -41,11 +41,12 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.annimon.stream.function.Consumer;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.nutomic.syncthingandroid.R;
 import com.nutomic.syncthingandroid.SyncthingApp;
 import com.nutomic.syncthingandroid.fragments.DeviceListFragment;
@@ -58,6 +59,7 @@ import com.nutomic.syncthingandroid.util.PermissionUtil;
 import com.nutomic.syncthingandroid.util.Util;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -90,38 +92,28 @@ public class MainActivity extends StateDialogActivity
     private AlertDialog mQrCodeDialog;
     private Dialog mRestartDialog;
     private boolean mBatteryOptimizationDialogDismissed;
-    private ViewPager mViewPager;
+    private ViewPager2 mViewPager;
     private FolderListFragment mFolderListFragment;
     private DeviceListFragment mDeviceListFragment;
-    private final FragmentPagerAdapter mSectionsPagerAdapter =
-            new FragmentPagerAdapter( getSupportFragmentManager() )
+    private final FragmentStateAdapter mSectionsPagerAdapter =
+            new FragmentStateAdapter( Objects.requireNonNull( getSupportFragmentManager().getPrimaryNavigationFragment() ) )
             {
 
                 @Override
-                public Fragment getItem( int position )
+                public int getItemCount()
+                {
+                    return 0;
+                }
+
+                @NonNull
+                @Override
+                public Fragment createFragment( int position )
                 {
                     return switch ( position )
                     {
                         case 0 -> mFolderListFragment;
                         case 1 -> mDeviceListFragment;
-                        default -> null;
-                    };
-                }
-
-                @Override
-                public int getCount()
-                {
-                    return 2;
-                }
-
-                @Override
-                public CharSequence getPageTitle( int position )
-                {
-                    return switch ( position )
-                    {
-                        case 0 -> getResources().getString( R.string.folders_fragment_title );
-                        case 1 -> getResources().getString( R.string.devices_fragment_title );
-                        default -> String.valueOf( position );
+                        default -> mFolderListFragment;
                     };
                 }
             };
@@ -252,7 +244,8 @@ public class MainActivity extends StateDialogActivity
         mViewPager = findViewById( R.id.pager );
         mViewPager.setAdapter( mSectionsPagerAdapter );
         TabLayout tabLayout = findViewById( R.id.tabContainer );
-        tabLayout.setupWithViewPager( mViewPager );
+        //tabLayout.setupWithViewPager( mViewPager );
+        new TabLayoutMediator( tabLayout, mViewPager, ( tab, position ) -> tab.setText( "OBJECT " + ( position + 1 ) ) ).attach();
         if ( savedInstanceState != null )
         {
             mViewPager.setCurrentItem( savedInstanceState.getInt( "currentTab" ) );

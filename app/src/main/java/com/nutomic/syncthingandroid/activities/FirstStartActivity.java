@@ -320,6 +320,9 @@ public class FirstStartActivity extends Activity
         Boolean doInitialKeyGeneration = !Constants.getConfigFile( this ).exists();
         Intent mainIntent = new Intent( this, MainActivity.class );
         mainIntent.putExtra( MainActivity.EXTRA_KEY_GENERATION_IN_PROGRESS, doInitialKeyGeneration );
+        System.gc();
+        System.runFinalization();
+        System.gc();
         /*
          * In case start_into_web_gui option is enabled, start both activities
          * so that back navigation works as expected.
@@ -332,7 +335,7 @@ public class FirstStartActivity extends Activity
         {
             startActivity( mainIntent );
         }
-        finish();
+        finishActivity( 0 );
     }
 
     private boolean hasLocationPermission()
